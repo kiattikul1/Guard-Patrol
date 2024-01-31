@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Guard-Patrol</string>
+    <string name="item">Items</string>
+    <string-array name="item_label">
+        <item>txt1</item>
+        <item>txt2</item>
+        <item>txt3</item>
+        <item>txt4</item>
+        <item>txt5</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

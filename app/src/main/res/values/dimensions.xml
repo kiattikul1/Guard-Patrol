@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="elevation_set">6dp</dimen>
+    <dimen name="font_header">28dp</dimen>s
+    <dimen name="font_checklist">24dp</dimen>
+    <dimen name="font_btn_home">26dp</dimen>
+    <dimen name="font_title">22dp</dimen>
+    <dimen name="font_subtitle">20dp</dimen>
+    <dimen name="font_detail">18dp</dimen>
+</resources>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:circularflow_radiusInDP="21"
+    tools:context=".Activity.LoginActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_percent="0.9"
+        app:layout_constraintHeight_percent="0.95"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/icMetthier"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_metthier"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" >
+
+        </ImageView>
+
+        <TextView
+            android:id="@+id/txtMtthier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/icMetthier"
+            android:text="metthier"
+            android:textColor="@color/black"
+            android:textSize="40dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/txtUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/txtMtthier"
+            android:text="ชื่อผู้ใช้"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:fontFamily="@font/sukhumvitset_bold"
+            android:layout_marginTop="50dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            tools:ignore="MissingConstraints" />
+
+        <com.tistory.zladnrms.roundablelayout.RoundableLayout
+            android:id="@+id/inputUsername"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/txtUsername"
+            app:backgroundColor="#EAF1FB"
+            app:layout_constraintDimensionRatio="293:54"
+            app:cornerAll="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/editUsername"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:paddingVertical="16dp"
+                    android:lineSpacingMultiplier="0.6"
+                    android:background="@color/bg_transparent"
+                    android:fontFamily="@font/sukhumvitset_light"
+                    android:hint="ชื่อผู้ใช้" />
+
+                <ImageButton
+                    android:id="@+id/icCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:padding="8dp"
+                    android:background="@null"
+                    android:src="@drawable/ic_close_circle"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                </ImageButton>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.tistory.zladnrms.roundablelayout.RoundableLayout>
+
+        <TextView
+            android:id="@+id/txtPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/inputUsername"
+            android:text="รหัสผ่าน"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:fontFamily="@font/sukhumvitset_bold"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            tools:ignore="MissingConstraints" />
+
+        <com.tistory.zladnrms.roundablelayout.RoundableLayout
+            android:id="@+id/inputPassword"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/txtPassword"
+            app:backgroundColor="#EAF1FB"
+            app:cornerAll="10dp"
+            app:layout_constraintDimensionRatio="293:54"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/editPassword"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:paddingVertical="16dp"
+                    android:hint="รหัสผ่าน"
+                    android:background="@color/bg_transparent"
+                    android:fontFamily="@font/sukhumvitset_light"
+                    android:inputType="textPassword"
+                    android:password="true">
+
+                </EditText>
+
+                <ImageButton
+                    android:id="@+id/icEye"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="@null"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_eye_gray"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+                </ImageButton>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.tistory.zladnrms.roundablelayout.RoundableLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="50dp"
+            android:backgroundTint="@color/color_btn_app"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="8dp"
+            android:outlineSpotShadowColor="@color/color_bg_app"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="เข้าสู่ระบบ"
+                android:fontFamily="@font/sukhumvitset_bold"
+                android:textSize="20dp"
+                android:textColor="@color/white"
+                android:paddingVertical="16dp"
+                android:layout_gravity="center"
+                android:textStyle="bold" />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/forgetPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ลืมรหัสผ่าน"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:fontFamily="@font/sukhumvitset_bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnLogin"
+            tools:layout_editor_absoluteX="9dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

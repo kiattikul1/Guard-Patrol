@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/pageHome"
+        android:enabled="true"
+        android:icon="@drawable/home_selector"
+        android:title="หน้าหลัก"/>
+    <item
+        android:id="@+id/pageSetting"
+        android:icon="@drawable/settings_selector"
+        android:enabled="true"
+        android:title="ตั้งค่า" />
+    <item
+        android:id="@+id/pageProfile"
+        android:enabled="true"
+        android:icon="@drawable/user_selector"
+        android:title="โปรไฟล์"/>
+</menu>
