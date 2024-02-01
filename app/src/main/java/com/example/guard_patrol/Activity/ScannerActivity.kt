@@ -33,13 +33,21 @@ import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.budiyev.android.codescanner.ScanMode
+import com.example.guard_patrol.Class.ScanQrClass
+import com.example.guard_patrol.Class.TokenClass
+import com.example.guard_patrol.Data.AllService
 import com.example.guard_patrol.Data.Preference.WorkspacePref
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityScannerBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Response
 import java.util.Locale
 
 
@@ -48,14 +56,14 @@ class ScannerActivity : BasedActivity() {
     private lateinit var codeScanner: CodeScanner
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val permissionId = 2
-    private var myLatitude : Double = 0.0
-    private var myLongitude : Double = 0.0
-    private lateinit var qrWorkspaceId : String
-    private var qrLatitude : Double = 0.0
-    private var qrLongitude : Double = 0.0
+    private var myLatitude : Double? = null
+    private var myLongitude : Double? = null
+    private var qrWorkspaceId : String? = null
+    private var qrLatitude : Double? = null
+    private var qrLongitude : Double? = null
     private val setDistance : Double = 200.0
-    private lateinit var pointId : String
-    private lateinit var pointName : String
+    private var pointId : String? = null
+    private var pointName : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +86,7 @@ class ScannerActivity : BasedActivity() {
         super.onPause()
     }
 
-    fun cancelScan(view: View) {
+    fun cancelScan() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
@@ -96,23 +104,34 @@ class ScannerActivity : BasedActivity() {
             runOnUiThread {
                 try {
                     val scanResult = it.text
-//                    Log.d("TestResult","Check $scanResult")
-                    val json = JSONObject(scanResult)
-//                    Log.d("TestResultJsonObject","Check $jsonObject")
+                    Log.d("TestResult","Check $scanResult")
 
-                    if (json.has("workspace_id") && json.has("point_id") && json.has("point_name") && json.has("lat") && json.has("lng")) {
-                        qrWorkspaceId = json.getString("workspace_id")
-                        pointId = json.getString("point_id")
-                        pointName = json.getString("point_name")
-                        qrLatitude = json.getDouble("lat")
-                        qrLongitude = json.getDouble("lng")
-                        getLocation()
-                    } else {
-                        //Error QR
-                        val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
-                        val message = "กรุณาลองใหม่อีกครั้ง"
-                        showCustomErrorDialogBox(title ,message ,R.drawable.ic_error)
+                    getTokenQR(scanResult){ qrCorrect ->
+                        if (qrCorrect){
+                            getLocation()
+                        }else{
+                            //Error QR
+                            val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
+                            val message = "กรุณาลองใหม่อีกครั้ง"
+                            showCustomErrorDialogBox(title ,message ,R.drawable.ic_error)
+                        }
                     }
+
+//                    val json = JSONObject(scanResult)
+////                    Log.d("TestResultJsonObject","Check $jsonObject")
+//                    if (json.has("workspace_id") && json.has("point_id") && json.has("point_name") && json.has("lat") && json.has("lng")) {
+//                        qrWorkspaceId = json.getString("workspace_id")
+//                        pointId = json.getString("point_id")
+//                        pointName = json.getString("point_name")
+//                        qrLatitude = json.getDouble("lat")
+//                        qrLongitude = json.getDouble("lng")
+//                        getLocation()
+//                    } else {
+//                        //Error QR
+//                        val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
+//                        val message = "กรุณาลองใหม่อีกครั้ง"
+//                        showCustomErrorDialogBox(title ,message ,R.drawable.ic_error)
+//                    }
                 } catch (e: JSONException) {
                     //Error QR
                     val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
@@ -155,9 +174,8 @@ class ScannerActivity : BasedActivity() {
 //                        Log.d("TestMyLocation", "check $myLatitude -- $myLongitude")
 //                        Log.d("TestLocation", "Latitude\\n${list[0].latitude}")
 //                        Log.d("TestLocation", "Longitude\\n${list[0].longitude}")
-                        val distance = calculateDistance(qrLatitude, qrLongitude, myLatitude, myLongitude)
-                        //TODO : Check PointId??
-                        validateQR(qrWorkspaceId,distance.toDouble())
+                        val distance = calculateDistance(qrLatitude!!, qrLongitude!!, myLatitude!!, myLongitude!!)
+                        validateQR(qrWorkspaceId!!,distance.toDouble())
 //                        Log.d("TestQRLat", "check $qrLatitude")
 //                        Log.d("TestQRLng", "check $qrLongitude")
 //                        Log.d("TestDistance", "check $distance meters")
@@ -223,17 +241,60 @@ class ScannerActivity : BasedActivity() {
         }
     }
 
-    //Find distance between user and QR
-    private fun calculateDistance(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Float {
-        val startPoint = Location("QR location")
-        startPoint.latitude = latitudeA
-        startPoint.longitude = longitudeA
+    private fun getTokenQR(scanResult: String,cb: ((qrCorrect: Boolean) -> Unit)){
+        val paramObject = JsonObject()
+        paramObject.addProperty("tokenQr", scanResult)
+        val query: String = "query ScanQrcode(\$tokenQr: String!) {\n" +
+                "  scanQrcode(token_qr: \$tokenQr) {\n" +
+                "    workspace_id\n" +
+                "    point_id\n" +
+                "    point_name\n" +
+                "    lat\n" +
+                "    lng\n" +
+                "  }\n" +
+                "}"
 
-        val endPoint = Location("My Location")
-        endPoint.latitude = latitudeB
-        endPoint.longitude = longitudeB
+        val reqObject = JsonObject()
+        reqObject.addProperty("query",query)
+        reqObject.add("variables", paramObject)
 
-        return startPoint.distanceTo(endPoint)
+        val retrofitService = AllService.getInstance()
+        retrofitService.callGraphQLService(reqObject).enqueue(object:
+            retrofit2.Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    try {
+                        val responseBody = response.body()?.string()
+                        val gson = Gson()
+                        val scanQrClass = gson.fromJson(responseBody, ScanQrClass::class.java)
+                        val qrValue = scanQrClass.data?.scanQrcode
+                        Log.d("TestScanQR", "Pass Test $qrValue")
+
+                        qrWorkspaceId = qrValue?.workspaceId
+                        pointId = qrValue?.pointId
+                        pointName = qrValue?.pointName
+                        qrLatitude = qrValue?.lat?.toDouble()
+                        qrLongitude = qrValue?.lng?.toDouble()
+
+                        cb.invoke(
+                            qrWorkspaceId != null &&
+                                    pointId != null &&
+                                    pointName != null &&
+                                    qrLatitude != null &&
+                                    qrLongitude != null
+                        )
+
+                    } catch (e: Exception) {
+                        Log.e("TestScanQR", "Error parsing response body: $e")
+                    }
+                } else {
+                    Log.e("TestScanQR", "Fail Test ${response.code()}")
+                }
+            }
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("TestScanQR","Error $t")
+            }
+        })
     }
 
     private fun validateQR(qrWorkspaceId: String,distance : Double){
@@ -249,6 +310,19 @@ class ScannerActivity : BasedActivity() {
             val iconResId = R.drawable.ic_location_slash
             showCustomErrorDialogBox(title, message, iconResId)
         }
+    }
+
+    //Find distance between user and QR
+    private fun calculateDistance(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Float {
+        val startPoint = Location("QR location")
+        startPoint.latitude = latitudeA
+        startPoint.longitude = longitudeA
+
+        val endPoint = Location("My Location")
+        endPoint.latitude = latitudeB
+        endPoint.longitude = longitudeB
+
+        return startPoint.distanceTo(endPoint)
     }
 
     private fun showCustomErrorDialogBox(title: String? ,message: String?, iconDrawable: Int){
