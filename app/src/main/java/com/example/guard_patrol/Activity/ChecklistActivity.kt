@@ -41,6 +41,9 @@ import com.example.guard_patrol.databinding.ActivityChecklistBinding
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -68,7 +71,7 @@ class ChecklistActivity : BasedActivity() {
     private var positionImage : Int? = null
     private lateinit var idImage : String
     private var imageFiles:  ArrayList<ArrayList<File>>? = null
-    private val imageUrlsMap = ArrayList<ArrayList<String>>()
+    private val imageUrlsMap = ArrayList<String>()
     private val storageRequestCode = 1
 
     private val contract = registerForActivityResult(ActivityResultContracts.TakePicture()){ result ->
@@ -91,26 +94,22 @@ class ChecklistActivity : BasedActivity() {
                 stream.flush()
                 stream.close()
 
-                // Add the new image file to the list
                 if (imageFiles != null) {
-                    // Check if the position exists in the array
-                    if (positionImage != null && positionImage!! >= 0 && positionImage!! < imageFiles!!.size) {
-                        // Find the position of the old file in the array
-                        val oldFileIndex = imageFiles!![positionImage!!].indexOfFirst { it.path == newImageFile.path }
-                        if (oldFileIndex != -1) {
-                            // Replace the old file with the new file in the list at the specified position
-                            imageFiles!![positionImage!!][oldFileIndex] = newImageFile
-                        } else {
-                            // If the old file is not found in the list, add the new file to the list at the specified position
-                            imageFiles!![positionImage!!].add(newImageFile)
-                        }
+                    // Ensure that imageFiles has enough elements to accommodate the positionImage
+                    while (imageFiles!!.size <= positionImage!!) {
+                        imageFiles!!.add(ArrayList())
+                    }
+                    val oldFileIndex = imageFiles!![positionImage!!].indexOfFirst { it.path == newImageFile.path }
+                    if (oldFileIndex != -1) {
+                        // Replace the old file with the new file in the list at the specified position
+                        imageFiles!![positionImage!!][oldFileIndex] = newImageFile
                     } else {
-                        // If the position is out of bounds, create a new list and add the file to it
-                        val newList = ArrayList<File>()
-                        newList.add(newImageFile)
-                        imageFiles!!.add(newList)
+                        // If the old file is not found in the list, add the new file to the list at the specified position
+                        imageFiles!![positionImage!!].add(newImageFile)
                     }
                 }
+
+                positionImage = null
 
                 Log.d("TestCheckFile", "$imageFiles")
 
@@ -158,13 +157,13 @@ class ChecklistActivity : BasedActivity() {
         }, actionSubmitForm = {
             val dataItems = cellTypeList.filter { it.cellType == CellType.TASK }
             val taskId = cellTypeList.firstOrNull()?.data?.assignTask?.tasks?.firstOrNull()?.id
-            imageFiles?.let { uploadImages(it) {
-//                cellTypeList[positionImage!!].imageUrls.addAll(imageUrlsMap[positionImage!!] ?: emptyList())
-            } }
+//            uploadImages(imageFiles!!) {
+////                cellTypeList[positionImage!!].imageUrls.addAll(imageUrlsMap[positionImage!!] ?: emptyList())
+//            }
             var errorDialogShown = false
             if (taskId != null) {
                 val tasksArray = JsonArray()
-                dataItems.forEach { data ->
+                dataItems.forEachIndexed  {index, data ->
                     val taskObject = JsonObject()
                     taskObject.addProperty("task_id", taskId)
                     taskObject.addProperty("isNormal", data.isNormal)
@@ -192,20 +191,22 @@ class ChecklistActivity : BasedActivity() {
                                 //3. Loop Https URL []
                                 //TODO: Loop Https URL []
                                 val imageJsonArray = JsonArray()
-
+                                uploadImages(imageFiles!![index]){ imageUrlsList ->
+                                    imageJsonArray.add(imageUrlsList.toString())
+                                }
 
                                 taskObject.add("imageUrls", imageJsonArray)
                             }
                         }
                         tasksArray.add(taskObject)
                     }
+                    imageUrlsMap.clear()
                 }
                 Log.d("TestSendReport","Check $tasksArray")
 //                sendReport(tasksArray)
 //                val title = "การส่งรายงานเสร็จสิ้น"
 //                showCustomPassDialogBox(title ,R.drawable.ic_pass)
                 //TODO: - Call API Submit -> tasksArray
-
             }
         })
 
@@ -441,70 +442,58 @@ class ChecklistActivity : BasedActivity() {
         applicationContext.sendBroadcast(mediaScanIntent)
     }
 
-    private fun uploadImages(imageFiles: ArrayList<ArrayList<File>>, cb: (() -> Unit)) {
+    private fun uploadImages(imageFiles: ArrayList<File>, cb: ((ArrayList<String>) -> Unit)) {
         val retrofitServiceAPI = AllService.getURL()
-        for (position in imageFiles.indices) {
-            val files = imageFiles[position]
-            val imageParts = mutableListOf<MultipartBody.Part>()
-            val imageUrls = ArrayList<String>()
+        val imageUrlsList = ArrayList<String>()
 
-            for (file in files) {
-                if (!file.exists()) {
-                    Log.d("TestCheckFile", "Image file does not exist: ${file.name}")
-                    // ถ้าไฟล์ไม่มีอยู่ในตำแหน่งที่กำหนดให้ข้ามไปทำตำแหน่งถัดไป
-                    continue
-                }
-                // สร้าง MultipartBody.Part จากไฟล์ภาพ
+        for (position in imageFiles.indices) {
+            val file = imageFiles[position]
+            val imageParts = mutableListOf<MultipartBody.Part>()
+
+            // ตรวจสอบไฟล์ภาพที่จะอัปโหลด
+            if (file.exists()) {
                 val imagePart: MultipartBody.Part = MultipartBody.Part.createFormData(
                     "images",
                     file.name,
                     RequestBody.create("image/*".toMediaTypeOrNull(), file)
                 )
-                // เพิ่ม MultipartBody.Part เข้าไปในลิสต์
                 imageParts.add(imagePart)
-            }
-            // ตรวจสอบว่ามีไฟล์ภาพที่จะอัปโหลดหรือไม่
-            if (imageParts.isNotEmpty()) {
-                retrofitServiceAPI.callRestAPIService(imageParts).enqueue(object : retrofit2.Callback<ResponseBody> {
-                    override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                        if (response.isSuccessful) {
-                            try {
-                                val responseBody = response.body()?.string()
-//                                Log.d("TestImageURL", "Response: $responseBody")
-                                val jsonObject = responseBody?.let { JSONObject(it) }
-                                val imagesUrlArray = jsonObject?.getJSONArray("imagesUrl")
 
-                                if (imagesUrlArray != null) {
-                                    for (i in 0 until imagesUrlArray.length()) {
-                                        val imageUrl = imagesUrlArray.getString(i)
-                                        imageUrls.add(imageUrl)
+                retrofitServiceAPI.callRestAPIService(imageParts)
+                    .enqueue(object : retrofit2.Callback<ResponseBody> {
+                        override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                            if (response.isSuccessful) {
+                                try {
+                                    val responseBody = response.body()?.string()
+                                    val jsonObject = responseBody?.let { JSONObject(it) }
+                                    val imagesUrlArray = jsonObject?.getJSONArray("imagesUrl")
+
+                                    if (imagesUrlArray != null) {
+                                        for (i in 0 until imagesUrlArray.length()) {
+                                            val imageUrl = imagesUrlArray.getString(i)
+                                            imageUrlsList.add(imageUrl)
+                                        }
+                                        Log.d("TestImageURL", "Pass Check $imageUrlsList")
+                                        cb.invoke(imageUrlsList)
                                     }
+                                } catch (e: Exception) {
+                                    Log.e("TestImageURL", "Error parsing response body: $e")
                                 }
-
-                                // เพิ่ม imageUrls ลงในลิสต์หลัก (ตำแหน่ง position)
-                                if (imageUrls.isNotEmpty()) {
-                                    imageUrlsMap.add(imageUrls)
-                                }
-
-                                cb.invoke()
-                                Log.d("TestMapURL", "MapURL $imageUrlsMap")
-                            } catch (e: Exception) {
-                                Log.d("TestImageURL", "Error parsing response body: $e")
+                            } else {
+                                Log.e("TestImageURL", "Error: ${response.code()}")
                             }
-                        } else {
-                            Log.d("TestImageURL", "Error: ${response.code()}")
                         }
-                    }
 
-                    override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                        Log.d("TestImageURL", "Failure: $t")
-                    }
-                })
+                        override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                            Log.e("TestImageURL", "Failure: $t")
+                        }
+                    })
             } else {
-                Log.d("TestImageURL", "No images to upload.")
+                Log.e("TestImageURL", "Image file does not exist: ${file.name}")
             }
         }
     }
+
 
 
     private fun checkAndRequestStoragePermission(activity: BasedActivity) {
