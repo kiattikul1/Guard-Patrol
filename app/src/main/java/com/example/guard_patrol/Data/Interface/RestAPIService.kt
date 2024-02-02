@@ -19,5 +19,5 @@ interface RestAPIService {
     @Multipart
     @POST("upload")
     @Headers("Accept: */*")
-    fun callRestAPIService(@Part imagePart: MutableList<MultipartBody.Part>): Call<ResponseBody>
+    fun callRestAPIService(@Part imagePart: List<MultipartBody.Part>): Call<ResponseBody>
 }
