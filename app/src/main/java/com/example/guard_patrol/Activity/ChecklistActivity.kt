@@ -147,99 +147,81 @@ class ChecklistActivity : BasedActivity() {
 
         }, actionSubmitForm = {
             val dataItems = cellTypeList.filter { it.cellType == CellType.TASK }
-            val taskId = cellTypeList.firstOrNull()?.data?.assignTask?.tasks?.firstOrNull()?.id
             var errorDialogShown = false
-            if (taskId != null) {
-                val tasksArray = JsonArray()
-                dataItems.forEach{ data ->
-                    val taskObject = JsonObject()
-                    taskObject.addProperty("task_id", taskId)
-                    taskObject.addProperty("isNormal", data.isNormal)
 
-                    if (data.isNormal == null && !errorDialogShown){
-                        val title = "ไม่สามารถส่งรายงานได้"
-                        val message = "กรุณาตรวจสอบให้แน่ใจว่าได้ทำการ\nตรวจเช็คทุกรายการแล้ว"
-                        val iconResId = R.drawable.ic_error
-                        showCustomErrorDialogBox(title, message, iconResId)
-                        errorDialogShown = true
-                    } else {
-                        if (data.isNormal == false) {
-                            if ((data.remark == null || data.remark == "") && !errorDialogShown){
-                                val title = "ไม่สามารถส่งรายงานได้"
-                                val message = "จำเป็นต้องกรอกหมายเหตุ"
-                                val iconResId = R.drawable.ic_error
-                                showCustomErrorDialogBox(title, message, iconResId)
-                                errorDialogShown = true
-                            } else {
-                                taskObject.addProperty("remark", data.remark)
-                            }
+            val tasksArray = JsonArray()
+            dataItems.forEach{ data ->
+                val taskObject = JsonObject()
+                taskObject.addProperty("task_id", data.data?.assignTask?.tasks?.firstOrNull()?.id)
+                taskObject.addProperty("isNormal", data.isNormal)
+
+                if (data.isNormal == null && !errorDialogShown){
+                    val title = "ไม่สามารถส่งรายงานได้"
+                    val message = "กรุณาตรวจสอบให้แน่ใจว่าได้ทำการ\nตรวจเช็คทุกรายการแล้ว"
+                    val iconResId = R.drawable.ic_error
+                    showCustomErrorDialogBox(title, message, iconResId)
+                    errorDialogShown = true
+                } else {
+                    if (data.isNormal == false) {
+                        if ((data.remark == null || data.remark == "") && !errorDialogShown){
+                            val title = "ไม่สามารถส่งรายงานได้"
+                            val message = "จำเป็นต้องกรอกหมายเหตุ"
+                            val iconResId = R.drawable.ic_error
+                            showCustomErrorDialogBox(title, message, iconResId)
+                            errorDialogShown = true
+                        } else {
+                            taskObject.addProperty("remark", data.remark)
                         }
-
-                        tasksArray.add(taskObject)
                     }
+
+                    tasksArray.add(taskObject)
                 }
+            }
 
-                // Check each item in tasksArray
-                for (index in 0 until tasksArray.size()) {
-                    val task = tasksArray.get(index)
-                    val isNormal = task.asJsonObject.get("isNormal")?.asBoolean
-                    Log.d("TestSendReport Item $index", "isNormal: $isNormal")
-
-                    //TODO: - Check True or False
-                    if (isNormal == false) {
-                        // Loading
+            if(errorDialogShown == false){
+                // Check if any item in tasksArray has isNormal set to false
+                val isNormalFalsePresent = tasksArray.any {
+                    it.asJsonObject.get("isNormal")?.asBoolean == false
+                }
+                if (isNormalFalsePresent){
+                    //Loading
+                    if (imageFiles.isNotEmpty()){
                         uploadAllImages(imageFiles) { list ->
                             list.forEachIndexed { index, strings ->
                                 var sendObject = tasksArray.get(index).asJsonObject
                                 val imageJsonArray = JsonArray()
                                 strings.forEach { imageJsonArray.add(it) }
                                 if(strings.isNotEmpty()){
-                                    sendObject.add("imageUrls", imageJsonArray)
-                                    tasksArray.set(index, sendObject)
+                                    for (i in 0 until tasksArray.size()){
+                                        val task = tasksArray.get(index)
+                                        val isNormal = task.asJsonObject.get("isNormal")?.asBoolean
+
+                                        if (isNormal == false){
+                                            sendObject.add("evidenceImages", imageJsonArray)
+                                            tasksArray.set(index, sendObject)
+                                        }
+                                    }
                                 }
                             }
                             Log.d("TestSendReport Status False ","Check $tasksArray")
                             //Stop Loading
-                            //TODO: - Call API Submit -> tasksArray
-//                            sendReport(tasksArray)
-//                            val title = "การส่งรายงานเสร็จสิ้น"
-//                            showCustomPassDialogBox(title ,R.drawable.ic_pass)
+                            sendReport(tasksArray)
+                            val title = "การส่งรายงานเสร็จสิ้น"
+                            showCustomPassDialogBox(title ,R.drawable.ic_pass)
                         }
                     }else{
-                        Log.d("TestSendReport Status True ","Check $tasksArray")
-//                        sendReport(tasksArray)
-//                        val title = "การส่งรายงานเสร็จสิ้น"
-//                        showCustomPassDialogBox(title ,R.drawable.ic_pass)
+                        Log.d("TestSendReport Status False ","Check $tasksArray")
+                        //Stop Loading
+                        sendReport(tasksArray)
+                        val title = "การส่งรายงานเสร็จสิ้น"
+                        showCustomPassDialogBox(title ,R.drawable.ic_pass)
                     }
+                }else{
+                    Log.d("TestSendReport Status True ","Check $tasksArray")
+                    sendReport(tasksArray)
+                    val title = "การส่งรายงานเสร็จสิ้น"
+                    showCustomPassDialogBox(title ,R.drawable.ic_pass)
                 }
-
-                // Check if any item in tasksArray has isNormal set to false
-//                val isNormalFalsePresent = tasksArray.any {
-//                    it.asJsonObject.get("isNormal")?.asBoolean == false
-//                }
-//                if (isNormalFalsePresent){
-//                    //Loading
-//                    uploadAllImages(imageFiles) { list ->
-//                        list.forEachIndexed { index, strings ->
-//                            var sendObject = tasksArray.get(index).asJsonObject
-//                            val imageJsonArray = JsonArray()
-//                            strings.forEach { imageJsonArray.add(it) }
-//                            sendObject.add("imageUrls", imageJsonArray)
-//                            tasksArray.set(index, sendObject)
-//                        }
-//                        Log.d("TestSendReport Status False ","Check $tasksArray")
-//                        //Stop Loading
-//                        //TODO: - Call API Submit -> tasksArray
-////                        sendReport(tasksArray)
-////                        val title = "การส่งรายงานเสร็จสิ้น"
-////                        showCustomPassDialogBox(title ,R.drawable.ic_pass)
-//                    }
-//                }else{
-//                    Log.d("TestSendReport Status True ","Check $tasksArray")
-////                    sendReport(tasksArray)
-////                    val title = "การส่งรายงานเสร็จสิ้น"
-////                    showCustomPassDialogBox(title ,R.drawable.ic_pass)
-//                }
             }
         })
 
@@ -368,9 +350,7 @@ class ChecklistActivity : BasedActivity() {
         val paramObject = JsonObject()
         val submitTaskObject = JsonObject()
         submitTaskObject.addProperty("points_id", pointId)
-        // เพิ่ม tasksArray เข้าไปใน submitTaskObject
         submitTaskObject.add("tasks", tasksArray)
-        // เพิ่ม submitTaskObject เข้าไปใน paramObject
         paramObject.add("submitTask", submitTaskObject)
 
         val query: String = "mutation SubmitTasks(\$submitTask: SubmitTaskInput) {\n" +
@@ -389,6 +369,7 @@ class ChecklistActivity : BasedActivity() {
         headersObject.addProperty("Authorization", "Bearer $token")
         // Add headers to reqObject
         reqObject.add("headers", headersObject)
+        Log.d("TestSendReport", "Check reqObject $reqObject")
 
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
@@ -397,7 +378,7 @@ class ChecklistActivity : BasedActivity() {
                 if (response.isSuccessful) {
                     try {
                         val responseBody = response.body()?.string()
-                        Log.e("TestSendReport", "Pass Test $responseBody")
+                        Log.d("TestSendReport", "Pass Test $responseBody")
                     } catch (e: Exception) {
                         Log.e("TestSendReport", "Error parsing response body: $e")
                     }
@@ -463,7 +444,7 @@ class ChecklistActivity : BasedActivity() {
 
         Handler().postDelayed({
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+//            startActivity(intent)
             dialog.dismiss()
         }, 2000)
     }
@@ -540,8 +521,6 @@ class ChecklistActivity : BasedActivity() {
                 }
             })
     }
-
-
 
     private fun checkAndRequestStoragePermission(activity: BasedActivity) {
         if (ContextCompat.checkSelfPermission(

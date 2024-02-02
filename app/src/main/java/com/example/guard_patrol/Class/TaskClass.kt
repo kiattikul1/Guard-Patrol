@@ -10,7 +10,7 @@ data class TaskClass(
     var cellType: CellType,
     var data: GetTaskData?,
     var isNormal: Boolean? = null,
-    var imageUrls: ArrayList<String?> = ArrayList(listOf(null)),
+    var evidenceImages: ArrayList<String?> = ArrayList(listOf(null)),
     var remark: String? = null
 )
 
