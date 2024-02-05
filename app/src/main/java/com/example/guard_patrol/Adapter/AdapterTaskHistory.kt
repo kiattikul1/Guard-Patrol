@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.example.guard_patrol.Class.HistoryTaskDataClass
+import com.example.guard_patrol.Class.Patrol
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.CustomHistoryTaskBinding
 import java.text.SimpleDateFormat
@@ -14,7 +14,7 @@ import java.util.Date
 import java.util.Locale
 
 class AdapterTaskHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var dataList = ArrayList<HistoryTaskDataClass>()
+    var dataList = ArrayList<Patrol>()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -34,9 +34,9 @@ class AdapterTaskHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     inner class CustomHistoryTaskViewHolder(private val binding: CustomHistoryTaskBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bindCustomHistoryTaskView(dateSelectHistory: HistoryTaskDataClass){
-            val txtStartTime = dateSelectHistory.startTime
-            val txtEndTime = dateSelectHistory.endTime
+        fun bindCustomHistoryTaskView(dateSelectHistory: Patrol){
+            val txtStartTime = dateSelectHistory.processDate
+            val txtEndTime = dateSelectHistory.completedAt
             val layoutParams = binding.iconCheck.layoutParams as ConstraintLayout.LayoutParams
             binding.txtPointName.text = dateSelectHistory.pointName
             val timeStartFormat = txtStartTime?.let { formatTime(it) }

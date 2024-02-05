@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -24,6 +25,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -74,8 +76,16 @@ class ChecklistActivity : BasedActivity() {
     private val contract = registerForActivityResult(ActivityResultContracts.TakePicture()){ result ->
         if (result) {
             val bitmap: Bitmap? = decodeUriToBitmap(imageUri)
+            val rotatedBitmap = rotateBitmap(bitmap, 90f)
             captureIV.setImageBitmap(null)
-            captureIV.setImageBitmap(bitmap)
+            captureIV.setImageBitmap(rotatedBitmap)
+
+            //Fill image in ConstraintLayout
+            captureIV.scaleType = ImageView.ScaleType.CENTER_CROP
+            val params = captureIV.layoutParams as ConstraintLayout.LayoutParams
+            params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+            captureIV.layoutParams = params
 
             if (bitmap != null) {
                 saveImage(bitmap)
@@ -444,7 +454,7 @@ class ChecklistActivity : BasedActivity() {
 
         Handler().postDelayed({
             val intent = Intent(this, MainActivity::class.java)
-//            startActivity(intent)
+            startActivity(intent)
             dialog.dismiss()
         }, 2000)
     }
@@ -537,4 +547,10 @@ class ChecklistActivity : BasedActivity() {
         }
     }
 
+    // Function to rotate a Bitmap
+    private fun rotateBitmap(source: Bitmap?, angle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(source!!, 0, 0, source.width, source.height, matrix, true)
+    }
 }

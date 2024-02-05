@@ -85,12 +85,25 @@ class AdapterListTask(private var actionCamera: ((id: String,position: Int,image
                 binding.layoutWarning.visibility = View.GONE
             }
 
+            binding.imagePicker2.visibility = View.GONE
+            binding.imagePicker3.visibility = View.GONE
+
+            var isImagePicker1Completed = false
+            var isImagePicker2Completed = false
             //Capture Image
             binding.imagePicker1.setOnClickListener {
                 actionCamera?.invoke(binding.imageFirst.id.toString(),position,binding.imageFirst,)
+                isImagePicker1Completed = true
+                if (isImagePicker1Completed) {
+                    binding.imagePicker2.visibility = View.VISIBLE
+                }
             }
             binding.imagePicker2.setOnClickListener {
                 actionCamera?.invoke(binding.imageSecond.id.toString(),position,binding.imageSecond)
+                isImagePicker2Completed = true
+                if (isImagePicker2Completed) {
+                    binding.imagePicker3.visibility = View.VISIBLE
+                }
             }
             binding.imagePicker3.setOnClickListener {
                 actionCamera?.invoke(binding.imageThird.id.toString(),position,binding.imageThird)

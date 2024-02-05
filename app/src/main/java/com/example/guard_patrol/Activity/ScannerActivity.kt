@@ -86,7 +86,7 @@ class ScannerActivity : BasedActivity() {
         super.onPause()
     }
 
-    fun cancelScan() {
+    fun cancelScan(view: View) {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
@@ -116,22 +116,6 @@ class ScannerActivity : BasedActivity() {
                             showCustomErrorDialogBox(title ,message ,R.drawable.ic_error)
                         }
                     }
-
-//                    val json = JSONObject(scanResult)
-////                    Log.d("TestResultJsonObject","Check $jsonObject")
-//                    if (json.has("workspace_id") && json.has("point_id") && json.has("point_name") && json.has("lat") && json.has("lng")) {
-//                        qrWorkspaceId = json.getString("workspace_id")
-//                        pointId = json.getString("point_id")
-//                        pointName = json.getString("point_name")
-//                        qrLatitude = json.getDouble("lat")
-//                        qrLongitude = json.getDouble("lng")
-//                        getLocation()
-//                    } else {
-//                        //Error QR
-//                        val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
-//                        val message = "กรุณาลองใหม่อีกครั้ง"
-//                        showCustomErrorDialogBox(title ,message ,R.drawable.ic_error)
-//                    }
                 } catch (e: JSONException) {
                     //Error QR
                     val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
@@ -171,17 +155,8 @@ class ScannerActivity : BasedActivity() {
                         val list: List<Address> = geocoder.getFromLocation(location.latitude, location.longitude, 1)!!
                         myLatitude = list[0].latitude
                         myLongitude = list[0].longitude
-//                        Log.d("TestMyLocation", "check $myLatitude -- $myLongitude")
-//                        Log.d("TestLocation", "Latitude\\n${list[0].latitude}")
-//                        Log.d("TestLocation", "Longitude\\n${list[0].longitude}")
                         val distance = calculateDistance(qrLatitude!!, qrLongitude!!, myLatitude!!, myLongitude!!)
                         validateQR(qrWorkspaceId!!,distance.toDouble())
-//                        Log.d("TestQRLat", "check $qrLatitude")
-//                        Log.d("TestQRLng", "check $qrLongitude")
-//                        Log.d("TestDistance", "check $distance meters")
-//                        Log.d("TestLocation", "Country Name\\n${list[0].countryName}")
-//                        Log.d("TestLocation", "Locality\\n${list[0].locality}")
-//                        Log.d("TestLocation", "Address\\n${list[0].getAddressLine(0)}")
                     }
                 }
             } else {

@@ -3,18 +3,42 @@ package com.example.guard_patrol.Activity
 import BasedActivity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.guard_patrol.Adapter.AdapterDateSelectHistory
 import com.example.guard_patrol.Adapter.AdapterTaskHistory
-import com.example.guard_patrol.Class.HistoryDateClass
-import com.example.guard_patrol.Class.HistoryTaskDataClass
+import com.example.guard_patrol.Class.AssignTask
+import com.example.guard_patrol.Class.CellType
+import com.example.guard_patrol.Class.GetHistoryData
+import com.example.guard_patrol.Class.GetLocation
+import com.example.guard_patrol.Class.GetTaskData
+import com.example.guard_patrol.Class.HistoryClass
+import com.example.guard_patrol.Class.Patrol
+import com.example.guard_patrol.Class.Task
+import com.example.guard_patrol.Class.TaskClass
+import com.example.guard_patrol.Data.AllService
 import com.example.guard_patrol.databinding.ActivityHistoryBinding
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneId
+import java.time.chrono.ThaiBuddhistDate
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 class HistoryActivity : BasedActivity() {
     private lateinit var binding: ActivityHistoryBinding
-    private var historySelect = ArrayList<HistoryDateClass>()
+    private var historySelect = ArrayList<HistoryClass>()
     private lateinit var historyAdapter: AdapterDateSelectHistory
     private lateinit var historyTaskAdapter: AdapterTaskHistory
+    private val limitDay: Int = 10 //Set the number of days to go back.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,47 +50,130 @@ class HistoryActivity : BasedActivity() {
             startActivity(intent)
         }
 
+        val fullDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale("th", "TH"))
+        val zoneId = ZoneId.of("Asia/Bangkok")
+        val currentDate = LocalDate.now(zoneId)
+        // Create a YearMonth instance for the current year and month
+        val currentYearMonth = YearMonth.from(currentDate)
+        // Find the number of days in the current month
+        val daysInCurrentMonth = currentYearMonth.lengthOfMonth()
+//        Log.d("TestFiveDaysAgo", "Check fiveDaysAgo $daysInCurrentMonth")
+
         historyAdapter = AdapterDateSelectHistory()
         historyTaskAdapter = AdapterTaskHistory()
-        addHistoryToData()
 
+        for (i in 1..daysInCurrentMonth) {
+            val selectedDate = currentYearMonth.atDay(i)
+            val dateSelect = fullDateFormat.format(selectedDate)
+            historySelect.add(HistoryClass(dateSelect, null))
+            historyAdapter.dataList = historySelect
+
+            //Add Date history
+            binding.historyDateRecyclerView.apply {
+                layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.HORIZONTAL, false)
+                setHasFixedSize(true)
+                adapter = historyAdapter
+            }
+
+            historyAdapter.changeDate = { date , position ->
+                binding.txtDateSelect.text = date
+            }
+
+//            addHistoryToData(dateSelect)
+        }
     }
 
-    private fun addHistoryToData() {
-        val taskHistoryDetail1 = ArrayList<HistoryTaskDataClass>()
-        taskHistoryDetail1.add(HistoryTaskDataClass("หน้าหมู่บ้าน","13:05:02","14:00:01"))
-        taskHistoryDetail1.add(HistoryTaskDataClass("กลางหมู่บ้าน","14:05:02","15:00:01"))
-        taskHistoryDetail1.add(HistoryTaskDataClass("หลังหมู่บ้าน","",""))
-        historySelect.add(HistoryDateClass("2567-01-04",taskHistoryDetail1))
+    private fun addHistoryToData(selectDate: String) {
+        val historyObject = JsonObject()
+        val valuesList = workspacePreference.getPreferences()
+        val workspaceId = valuesList[0]
+        historyObject.addProperty("workspaceId", workspaceId)
+        historyObject.addProperty("workspaceAt", selectDate)
 
-        val taskHistoryDetail2 = ArrayList<HistoryTaskDataClass>()
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 1","",""))
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 2","",""))
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 3","",""))
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 4","12:00:12","15:00:21"))
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 7","",""))
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 9","",""))
-        taskHistoryDetail2.add(HistoryTaskDataClass("อาคารชั้น 12","10:00:12","11:00:12 "))
-        historySelect.add(HistoryDateClass("2567-01-01",taskHistoryDetail2))
-        historyAdapter.dataList = historySelect
+        val query: String = "query History(\$workspaceId: ID!, \$workspaceAt: String!) {\n" +
+                "  history(workspace_id: \$workspaceId, workspace_at: \$workspaceAt) {\n" +
+                "    workspace\n" +
+                "    patrols {\n" +
+                "      points_id\n" +
+                "      point_name\n" +
+                "      process_date\n" +
+                "      completed_at\n" +
+                "    }\n" +
+                "    \n" +
+                "  }\n" +
+                "}"
 
-        //Add Date history
-        this.binding.historyDateRecyclerView.apply {
-            layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.HORIZONTAL, false)
-            setHasFixedSize(true)
-            adapter = historyAdapter
-        }
-        historyAdapter.changeDate = { date , poistion ->
-            binding.txtDateSelect.text = date
-            historyTaskAdapter.dataList = historySelect[poistion!!].listData
-        }
+        val reqObject = JsonObject()
+        reqObject.addProperty("query",query)
+        reqObject.add("variables", historyObject)
+        val token = tokenPreference.getPreferences()
+        // Create headers object
+        val headersObject = JsonObject()
+        headersObject.addProperty("Authorization", "Bearer $token")
+        // Add headers to reqObject
+        reqObject.add("headers", headersObject)
+//        Log.d("TestReq", "Check reqObject $reqObject")
 
-        //Add Task history
-        this.binding.historyTaskRecyclerView.apply {
-            layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.VERTICAL, false)
-            setHasFixedSize(true)
-            adapter = historyTaskAdapter
-        }
+        val retrofitService = AllService.getInstance()
+        retrofitService.callGraphQLService(reqObject).enqueue(object:
+            retrofit2.Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    try {
+                        val responseBody = response.body()?.string()
+//                        Log.d("TestQlHistory", "Pass Test $responseBody")
+                        val gson = Gson()
+                        val historyResponse = gson.fromJson(responseBody, HistoryClass::class.java)
+                        val workspaceName = historyResponse.data?.history?.workspace
+//                        Log.d("TestQlHistory", "Check workspaceName $workspaceName")
+                        val patrolList = historyResponse.data?.history
+//                        Log.d("TestQlHistory", "Check patrolList $patrolList")
+                        val historyPatrol = ArrayList<Patrol>()
+                        patrolList?.patrols?.forEach { patrol ->
+                            val pointsId = patrol.pointsId
+                            val pointName = patrol.pointName
+                            val processDate = patrol.processDate
+                            val completedAt = patrol.completedAt
+                            historyPatrol.add(Patrol(pointsId,pointName,processDate,completedAt))
+                        }
+
+                        historySelect.add(HistoryClass(selectDate, GetHistoryData(GetLocation(
+                            workspaceName,historyPatrol)))
+                        )
+                        historyAdapter.dataList = historySelect
+
+                        //Add Date history
+                        binding.historyDateRecyclerView.apply {
+                            layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.HORIZONTAL, false)
+                            setHasFixedSize(true)
+                            adapter = historyAdapter
+                        }
+
+                        historyAdapter.changeDate = { date , position ->
+                            binding.txtDateSelect.text = date
+                            historyTaskAdapter.dataList = historySelect[position!!].data?.history?.patrols!!
+                        }
+
+                        //Add Task history
+                        binding.historyTaskRecyclerView.apply {
+                            layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.VERTICAL, false)
+                            setHasFixedSize(true)
+                            adapter = historyTaskAdapter
+                        }
+
+
+                    } catch (e: Exception) {
+                        Log.e("TestQlHistory", "Error parsing response body: $e")
+                    }
+                } else {
+                    Log.e("TestQlHistory", "Fail Test ${response.code()}")
+                }
+            }
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("TestQlHistory","Error $t")
+            }
+        })
+
 
     }
 }
