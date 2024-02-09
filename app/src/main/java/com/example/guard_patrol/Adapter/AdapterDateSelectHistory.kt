@@ -7,12 +7,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.guard_patrol.Class.HistoryClass
-import com.example.guard_patrol.Class.Patrol
 import com.example.guard_patrol.databinding.CustomDateSelectBinding
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.chrono.ThaiBuddhistDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
@@ -21,14 +19,19 @@ class AdapterDateSelectHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() 
     lateinit var formattedNameDay: String
     lateinit var formattedDay: String
     lateinit var formattedFullDate: String
-    var positionSelect: Int = 0
     var dataList = ArrayList<HistoryClass>()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    var changeDate: ((date: String?,position: Int?)-> Unit)? = null
+    var positionSelect = 0
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    var changeDate: ((date: String?)-> Unit)? = null
 
     override fun getItemCount(): Int {
         return dataList.size
@@ -57,7 +60,8 @@ class AdapterDateSelectHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() 
                 }
                 binding.txtNameOfDay.setTextColor(Color.WHITE)
                 binding.txtDay.setTextColor(Color.WHITE)
-                changeDate?.invoke(formattedFullDate,positionSelect)
+                changeDate?.invoke(formattedFullDate)
+
             }else{
                 binding.layoutBtnSelect.apply {
                     backgroundColor = Color.WHITE

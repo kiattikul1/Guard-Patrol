@@ -33,7 +33,13 @@ import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.budiyev.android.codescanner.ScanMode
+import com.example.guard_patrol.Class.AssignTask
+import com.example.guard_patrol.Class.CellType
+import com.example.guard_patrol.Class.GetTaskData
+import com.example.guard_patrol.Class.SOP
 import com.example.guard_patrol.Class.ScanQrClass
+import com.example.guard_patrol.Class.Task
+import com.example.guard_patrol.Class.TaskClass
 import com.example.guard_patrol.Class.TokenClass
 import com.example.guard_patrol.Data.AllService
 import com.example.guard_patrol.Data.Preference.WorkspacePref
@@ -64,6 +70,7 @@ class ScannerActivity : BasedActivity() {
     private val setDistance : Double = 200.0
     private var pointId : String? = null
     private var pointName : String? = null
+    private var messageStatus : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,8 +111,7 @@ class ScannerActivity : BasedActivity() {
             runOnUiThread {
                 try {
                     val scanResult = it.text
-                    Log.d("TestResult","Check $scanResult")
-
+//                    Log.d("TestResult","Check $scanResult")
                     getTokenQR(scanResult){ qrCorrect ->
                         if (qrCorrect){
                             getLocation()
@@ -121,7 +127,6 @@ class ScannerActivity : BasedActivity() {
                     val title = "รูปแบบ QR โค้ดไม่ถูกต้อง"
                     val message = "กรุณาลองใหม่อีกครั้ง"
                     showCustomErrorDialogBox(title ,message ,R.drawable.ic_error)
-//                    Toast.makeText(this, "Invalid QR Code content: Malformed JSON", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -178,18 +183,14 @@ class ScannerActivity : BasedActivity() {
     }
 
     private fun checkPermissions(): Boolean {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestPermissions() {
@@ -221,6 +222,7 @@ class ScannerActivity : BasedActivity() {
         paramObject.addProperty("tokenQr", scanResult)
         val query: String = "query ScanQrcode(\$tokenQr: String!) {\n" +
                 "  scanQrcode(token_qr: \$tokenQr) {\n" +
+                "    message\n" +
                 "    workspace_id\n" +
                 "    point_id\n" +
                 "    point_name\n" +
@@ -232,6 +234,10 @@ class ScannerActivity : BasedActivity() {
         val reqObject = JsonObject()
         reqObject.addProperty("query",query)
         reqObject.add("variables", paramObject)
+        val token = tokenPreference.getPreferences()
+        val headersObject = JsonObject()
+        headersObject.addProperty("Authorization", "Bearer $token")
+        reqObject.add("headers", headersObject)
 
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
@@ -245,6 +251,7 @@ class ScannerActivity : BasedActivity() {
                         val qrValue = scanQrClass.data?.scanQrcode
                         Log.d("TestScanQR", "Pass Test $qrValue")
 
+                        messageStatus = qrValue?.message
                         qrWorkspaceId = qrValue?.workspaceId
                         pointId = qrValue?.pointId
                         pointName = qrValue?.pointName
@@ -252,11 +259,7 @@ class ScannerActivity : BasedActivity() {
                         qrLongitude = qrValue?.lng?.toDouble()
 
                         cb.invoke(
-                            qrWorkspaceId != null &&
-                                    pointId != null &&
-                                    pointName != null &&
-                                    qrLatitude != null &&
-                                    qrLongitude != null
+                            messageStatus != "ERROR_QRCODE"
                         )
 
                     } catch (e: Exception) {
@@ -275,9 +278,25 @@ class ScannerActivity : BasedActivity() {
     private fun validateQR(qrWorkspaceId: String,distance : Double){
         val valuesList = workspacePreference.getPreferences()
         if (qrWorkspaceId == valuesList[0] && distance <= setDistance) {
-            // Pass
-            val title = "การสแกนเสร็จสิ้น"
-            showCustomPassDialogBox(title ,R.drawable.ic_pass)
+            when (messageStatus) {
+                "UNSUCCESSFUL" -> {
+                    // Pass
+                    val title = "การสแกนเสร็จสิ้น"
+                    showCustomPassDialogBox(title ,R.drawable.ic_pass)
+                }
+                "SUCCESSFUL" -> {
+                    val title = "การตรวจเช็คเสร็จสิ้นแล้ว"
+                    val message = "คุณได้ตรวจเช็คบริเวณนี้แล้ว"
+                    val iconResId = R.drawable.ic_task_completed
+                    showCustomErrorDialogBox(title, message, iconResId)
+                }
+                else -> {
+                    val title = "ไม่พบการมอบหมายงาน"
+                    val message = "ไม่มีการมอบหมายงานในบริเวณนี้"
+                    val iconResId = R.drawable.ic_not_found
+                    showCustomErrorDialogBox(title,  message, iconResId)
+                }
+            }
         } else {
             // Error Location
             val title = "คุณไม่ได้อยู่ในพื้นที่"

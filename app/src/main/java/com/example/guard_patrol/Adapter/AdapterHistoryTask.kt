@@ -13,12 +13,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class AdapterTaskHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class AdapterHistoryTask: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var dataList = ArrayList<Patrol>()
         set(value) {
             field = value
             notifyDataSetChanged()
         }
+
+    var historyDetail: ((pointId: String?)-> Unit)? = null
 
     override fun getItemCount(): Int {
         return dataList.size
@@ -42,7 +44,7 @@ class AdapterTaskHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val timeStartFormat = txtStartTime?.let { formatTime(it) }
             val timeEndFormat = txtEndTime?.let { formatTime(it) }
 
-            if(txtStartTime.isNullOrEmpty()){
+            if(txtStartTime.isNullOrEmpty() || txtEndTime.isNullOrEmpty()){
                 binding.iconCheck.layoutParams = layoutParams
                 binding.iconCheck.setImageResource(R.drawable.ic_task_not_check)
                 binding.txtStartPatrol.visibility = View.GONE
@@ -53,6 +55,7 @@ class AdapterTaskHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 val heightInPixels = (heightInDp * density).toInt()
                 binding.line.layoutParams.height = heightInPixels
                 binding.line.backgroundColor = Color.parseColor("#CECDCD")
+                binding.layoutCell.isClickable = false
                 binding.txtPointName.setTextColor(Color.parseColor("#CECDCD"))
                 binding.layoutCell.backgroundColor = Color.TRANSPARENT
             }else{
@@ -71,6 +74,9 @@ class AdapterTaskHistory: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 binding.layoutCell.backgroundColor = Color.parseColor("#1FDE00")
                 binding.txtStartPatrol.text = "เวลาเริ่มตรวจ: $timeStartFormat"
                 binding.txtEndPatrol.text = "เวลาส่งรายงาน: $timeEndFormat"
+                binding.layoutCell.setOnClickListener{
+                    historyDetail?.invoke(dateSelectHistory.pointsId)
+                }
             }
         }
     }

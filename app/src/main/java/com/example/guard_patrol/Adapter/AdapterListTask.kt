@@ -2,11 +2,8 @@ package com.example.guard_patrol.Adapter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +14,6 @@ import com.example.guard_patrol.Class.CellType
 import com.example.guard_patrol.Class.TaskClass
 import com.example.guard_patrol.databinding.BtnSentReportBinding
 import com.example.guard_patrol.databinding.CustomTaskBinding
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 
 @SuppressLint("NotifyDataSetChanged")
 class AdapterListTask(private var actionCamera: ((id: String,position: Int,image: ImageView)-> Unit)? = null,
@@ -68,7 +63,7 @@ class AdapterListTask(private var actionCamera: ((id: String,position: Int,image
             binding.txtTask.text = taskClass.data?.assignTask?.tasks?.firstOrNull()?.titleTask.orEmpty()
             binding.recyclerViewDetailCheckList.layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.VERTICAL, false)
 
-            val adapter = AdapterTaskDetail()
+            val adapter = AdapterTaskSop()
             adapter.dataList = taskClass.data?.assignTask?.tasks?.firstOrNull()?.sops!!
             binding.recyclerViewDetailCheckList.adapter = adapter
 
@@ -85,26 +80,25 @@ class AdapterListTask(private var actionCamera: ((id: String,position: Int,image
                 binding.layoutWarning.visibility = View.GONE
             }
 
-            binding.imagePicker2.visibility = View.GONE
-            binding.imagePicker3.visibility = View.GONE
-
-            var isImagePicker1Completed = false
-            var isImagePicker2Completed = false
             //Capture Image
             binding.imagePicker1.setOnClickListener {
                 actionCamera?.invoke(binding.imageFirst.id.toString(),position,binding.imageFirst,)
-                isImagePicker1Completed = true
-                if (isImagePicker1Completed) {
-                    binding.imagePicker2.visibility = View.VISIBLE
+                binding.imageFirst.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                    binding.imagePicker2.post {
+                        binding.imagePicker2.visibility = View.VISIBLE
+                    }
                 }
             }
+
             binding.imagePicker2.setOnClickListener {
                 actionCamera?.invoke(binding.imageSecond.id.toString(),position,binding.imageSecond)
-                isImagePicker2Completed = true
-                if (isImagePicker2Completed) {
-                    binding.imagePicker3.visibility = View.VISIBLE
+                binding.imageSecond.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                    binding.imagePicker3.post {
+                        binding.imagePicker3.visibility = View.VISIBLE
+                    }
                 }
             }
+
             binding.imagePicker3.setOnClickListener {
                 actionCamera?.invoke(binding.imageThird.id.toString(),position,binding.imageThird)
             }

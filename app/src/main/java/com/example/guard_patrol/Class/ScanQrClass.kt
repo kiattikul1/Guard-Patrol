@@ -10,6 +10,8 @@ data class GetScanData(val scanQrcode: ScanQrcode?)
 
 data class ScanQrcode(
 
+    val message: String?,
+
     @SerializedName("workspace_id")
     val workspaceId: String?,
 

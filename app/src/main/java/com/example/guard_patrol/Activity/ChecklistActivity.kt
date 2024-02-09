@@ -43,7 +43,6 @@ import com.example.guard_patrol.databinding.ActivityChecklistBinding
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import kotlinx.coroutines.DelicateCoroutinesApi
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -55,7 +54,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.OutputStream
-
 
 @SuppressLint("SetTextI18n")
 class ChecklistActivity : BasedActivity() {
@@ -76,6 +74,7 @@ class ChecklistActivity : BasedActivity() {
     private val contract = registerForActivityResult(ActivityResultContracts.TakePicture()){ result ->
         if (result) {
             val bitmap: Bitmap? = decodeUriToBitmap(imageUri)
+            Log.d("TestChangeUriToBitmap ","Check bitmap $bitmap")
             val rotatedBitmap = rotateBitmap(bitmap, 90f)
             captureIV.setImageBitmap(null)
             captureIV.setImageBitmap(rotatedBitmap)
@@ -106,10 +105,8 @@ class ChecklistActivity : BasedActivity() {
                 }
                 val oldFileIndex = imageFiles[positionImage!!].indexOfFirst { it.path == newImageFile.path }
                 if (oldFileIndex != -1) {
-                    // Replace the old file with the new file in the list at the specified position
                     imageFiles[positionImage!!][oldFileIndex] = newImageFile
                 } else {
-                    // If the old file is not found in the list, add the new file to the list at the specified position
                     imageFiles[positionImage!!].add(newImageFile)
                 }
 
@@ -158,7 +155,6 @@ class ChecklistActivity : BasedActivity() {
         }, actionSubmitForm = {
             val dataItems = cellTypeList.filter { it.cellType == CellType.TASK }
             var errorDialogShown = false
-
             val tasksArray = JsonArray()
             dataItems.forEach{ data ->
                 val taskObject = JsonObject()
@@ -189,7 +185,6 @@ class ChecklistActivity : BasedActivity() {
             }
 
             if(errorDialogShown == false){
-                // Check if any item in tasksArray has isNormal set to false
                 val isNormalFalsePresent = tasksArray.any {
                     it.asJsonObject.get("isNormal")?.asBoolean == false
                 }
@@ -213,21 +208,19 @@ class ChecklistActivity : BasedActivity() {
                                     }
                                 }
                             }
-                            Log.d("TestSendReport Status False ","Check $tasksArray")
-                            //Stop Loading
+//                            Log.d("TestSendReport Status False ","Check $tasksArray")
                             sendReport(tasksArray)
                             val title = "การส่งรายงานเสร็จสิ้น"
                             showCustomPassDialogBox(title ,R.drawable.ic_pass)
                         }
                     }else{
-                        Log.d("TestSendReport Status False ","Check $tasksArray")
-                        //Stop Loading
+//                        Log.d("TestSendReport Status False ","Check $tasksArray")
                         sendReport(tasksArray)
                         val title = "การส่งรายงานเสร็จสิ้น"
                         showCustomPassDialogBox(title ,R.drawable.ic_pass)
                     }
                 }else{
-                    Log.d("TestSendReport Status True ","Check $tasksArray")
+//                    Log.d("TestSendReport Status True ","Check $tasksArray")
                     sendReport(tasksArray)
                     val title = "การส่งรายงานเสร็จสิ้น"
                     showCustomPassDialogBox(title ,R.drawable.ic_pass)
@@ -379,7 +372,7 @@ class ChecklistActivity : BasedActivity() {
         headersObject.addProperty("Authorization", "Bearer $token")
         // Add headers to reqObject
         reqObject.add("headers", headersObject)
-        Log.d("TestSendReport", "Check reqObject $reqObject")
+//        Log.d("TestSendReport", "Check reqObject $reqObject")
 
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
