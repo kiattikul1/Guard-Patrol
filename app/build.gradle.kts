@@ -54,8 +54,8 @@ dependencies {
     implementation("com.github.yuriy-budiyev:code-scanner:2.3.2")
 
     //Retrofit
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
@@ -63,5 +63,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
-
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.maps.android:android-maps-utils:2.2.0")
 }

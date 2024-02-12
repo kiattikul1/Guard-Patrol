@@ -21,7 +21,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -33,16 +32,8 @@ import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.budiyev.android.codescanner.ScanMode
-import com.example.guard_patrol.Class.AssignTask
-import com.example.guard_patrol.Class.CellType
-import com.example.guard_patrol.Class.GetTaskData
-import com.example.guard_patrol.Class.SOP
 import com.example.guard_patrol.Class.ScanQrClass
-import com.example.guard_patrol.Class.Task
-import com.example.guard_patrol.Class.TaskClass
-import com.example.guard_patrol.Class.TokenClass
 import com.example.guard_patrol.Data.AllService
-import com.example.guard_patrol.Data.Preference.WorkspacePref
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityScannerBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -51,7 +42,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import org.json.JSONException
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
 import java.util.Locale

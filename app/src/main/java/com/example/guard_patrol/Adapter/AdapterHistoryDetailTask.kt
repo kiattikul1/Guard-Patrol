@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Matrix
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +24,7 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
             notifyDataSetChanged()
         }
 
-    var addImage: ((image: ImageView?,imageBitmap: Bitmap)-> Unit)? = null
+    var addImage: ((image: ImageView?,imageBitmap: String)-> Unit)? = null
     override fun getItemCount(): Int {
         return dataList.size
     }
@@ -68,25 +69,17 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
                     binding.txtPhoto.visibility = View.GONE
                     binding.layoutImagePicker.visibility = View.GONE
                 }else{
-                    Log.e("TestDetailTaskHistory", "Check eImage1 $eImage1")
-                    val bitmapImageFirst = BitmapFactory.decodeFile(eImage1)
-                    Log.e("TestDetailTaskHistory", "Check bitmapImageFirst $bitmapImageFirst")
-//                    addImage?.invoke(binding.imageFirst,bitmapImageFirst)
-                    binding.imageFirst.setImageBitmap(bitmapImageFirst)
-                }
-
-                if (eImage2 == null){
-                    binding.imagePicker2.visibility = View.GONE
-                }else{
-                    val bitmapImageSecond = BitmapFactory.decodeFile(eImage2)
-                    binding.imageSecond.setImageBitmap(bitmapImageSecond)
-                }
-
-                if (eImage3 == null){
-                    binding.imagePicker3.visibility = View.GONE
-                }else{
-                    val bitmapImageThird = BitmapFactory.decodeFile(eImage3)
-                    binding.imageThird.setImageBitmap(bitmapImageThird)
+                    addImage?.invoke(binding.imageFirst,eImage1)
+                    if (eImage2 == null){
+                        binding.imagePicker2.visibility = View.GONE
+                    }else{
+                        addImage?.invoke(binding.imageSecond,eImage2)
+                        if (eImage3 == null){
+                            binding.imagePicker3.visibility = View.GONE
+                        }else{
+                            addImage?.invoke(binding.imageThird,eImage3)
+                        }
+                    }
                 }
 
                 binding.textAreaInformation.apply {
@@ -95,5 +88,7 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
             }
         }
     }
+
+
 
 }

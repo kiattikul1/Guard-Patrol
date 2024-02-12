@@ -1,6 +1,7 @@
 package com.example.guard_patrol.Activity
 
 import BasedActivity
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -85,6 +86,9 @@ class LoginActivity : BasedActivity() {
         //fun get token
         checkResponse(usernameText.toString(),passwordText.toString()) { token ->
             if (token != null) {
+                // create and show Progress Dialog
+                loadingDialog = ProgressDialog.show(this, "Please wait.", "Loading...", true, false)
+
                 tokenPreference.setPreferences(token)
 //                Log.d("Test TOKEN##", tokenPreference.getPreferences())
 
@@ -212,13 +216,16 @@ class LoginActivity : BasedActivity() {
                     }
                 }
 
+                loadingDialog.dismiss()
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             } else {
+                loadingDialog.dismiss()
                 val intent = Intent(this, SelectWorkspaceActivity::class.java)
                 startActivity(intent)
             }
         } else {
+            loadingDialog.dismiss()
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }

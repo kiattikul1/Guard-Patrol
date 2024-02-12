@@ -306,7 +306,7 @@ class ChecklistActivity : BasedActivity() {
                 if (response.isSuccessful) {
                     try {
                         val responseBody = response.body()?.string()
-//                        Log.e("TestQlCheckList", "Pass Test $responseBody")
+//                        Log.d("TestQlCheckList", "Pass Test $responseBody")
                         val gson = Gson()
                         val taskResponse = gson.fromJson(responseBody, TaskClass::class.java)
                         val listTask = taskResponse.data?.assignTask

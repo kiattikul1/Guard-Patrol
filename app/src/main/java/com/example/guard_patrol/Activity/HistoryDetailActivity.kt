@@ -2,6 +2,7 @@ package com.example.guard_patrol.Activity
 
 import BasedActivity
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -53,8 +54,6 @@ class HistoryDetailActivity : BasedActivity() {
 
         pointId = intent.getStringExtra("PointId").toString()
         workspaceAt = intent.getStringExtra("WorkspaceAt").toString()
-//        Log.d("TestHistoryDetail","Check pointId $pointId")
-//        Log.d("TestHistoryDetail","Check WorkspaceAt $WorkspaceAt")
 
         taskAdapter = AdapterHistoryDetailTask()
         listData(){
@@ -67,6 +66,25 @@ class HistoryDetailActivity : BasedActivity() {
             }
         }
 
+        taskAdapter.addImage = {image, imageBitmap ->
+            try {
+                val bitmap =  MyAsync(imageBitmap).execute().get()
+                val rotatedBitmap = rotateBitmap(bitmap, 90f)
+                image?.setImageBitmap(null)
+                image?.setImageBitmap(rotatedBitmap)
+
+                image?.scaleType = ImageView.ScaleType.CENTER_CROP
+                val params = image?.layoutParams as ConstraintLayout.LayoutParams
+                params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
+                params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+                image.layoutParams = params
+                // TODO: Close progressDialog
+                loadingDialog.dismiss()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun listData(cb: (()-> Unit)) {
@@ -102,6 +120,9 @@ class HistoryDetailActivity : BasedActivity() {
         reqObject.add("headers", headersObject)
 //        Log.d("TestDetailTaskHistory", "Check reqObject $reqObject")
 
+        // สร้างและแสดง Progress Dialog
+        loadingDialog = ProgressDialog.show(this, "Please wait.", "Loading...", true, false)
+
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
             retrofit2.Callback<ResponseBody> {
@@ -126,23 +147,12 @@ class HistoryDetailActivity : BasedActivity() {
                                 listSop.add(sopItem)
                             }
                             val isNormal = task.isNormal
-                            val evidenceImages = ArrayList<String?>()
+                            var evidenceImages = ArrayList<String?>()
                             var remark : String? = null
                             if (isNormal == false){
                                 if (task.evidenceImages != null) {
                                     val listImage = task.evidenceImages
-//                                    Log.d("TestDetailTaskHistory", "Check listImage $listImage")
-                                    for (imageUrl in listImage) {
-                                        try {
-                                            val bitmap = imageUrl?.let { MyAsync(it).execute().get() }
-//                                            Log.d("TestDetailTaskHistory", "Check bitmap $bitmap")
-                                            bitmap?.let {
-                                                evidenceImages.add(it.toString())
-                                            }
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
+                                    evidenceImages = listImage
                                 }
                                 remark = task.remark.toString()
                             }
@@ -182,6 +192,12 @@ class HistoryDetailActivity : BasedActivity() {
                 null
             }
         }
+    }
+
+    private fun rotateBitmap(source: Bitmap?, angle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(source!!, 0, 0, source.width, source.height, matrix, true)
     }
 
 }
