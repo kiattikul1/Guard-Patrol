@@ -65,4 +65,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.maps.android:android-maps-utils:2.2.0")
+    implementation("com.airbnb.android:lottie:3.4.0")
+    implementation("com.github.emreesen27:Android-Nested-Progress:v1.0.2")
+
 }

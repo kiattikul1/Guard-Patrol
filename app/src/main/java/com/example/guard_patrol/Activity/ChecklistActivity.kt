@@ -73,9 +73,12 @@ class ChecklistActivity : BasedActivity() {
 
     private val contract = registerForActivityResult(ActivityResultContracts.TakePicture()){ result ->
         if (result) {
+            val maxWidth = 800 // Set the maximum width
+            val maxHeight = 800 // Set the maximum height
             val bitmap: Bitmap? = decodeUriToBitmap(imageUri)
             Log.d("TestChangeUriToBitmap ","Check bitmap $bitmap")
-            val rotatedBitmap = rotateBitmap(bitmap, 90f)
+            val scaledBitmap = bitmap?.let { Bitmap.createScaledBitmap(it, maxWidth, maxHeight, true) }
+            val rotatedBitmap = rotateBitmap(scaledBitmap, 90f)
             captureIV.setImageBitmap(null)
             captureIV.setImageBitmap(rotatedBitmap)
 
@@ -96,7 +99,7 @@ class ChecklistActivity : BasedActivity() {
                 if (newImageFile.exists()) newImageFile.delete()
                 // Create a new file
                 val stream: OutputStream = FileOutputStream(newImageFile)
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                scaledBitmap?.compress(Bitmap.CompressFormat.JPEG, 80, stream)
                 stream.flush()
                 stream.close()
 
@@ -355,7 +358,6 @@ class ChecklistActivity : BasedActivity() {
         submitTaskObject.addProperty("points_id", pointId)
         submitTaskObject.add("tasks", tasksArray)
         paramObject.add("submitTask", submitTaskObject)
-
         val query: String = "mutation SubmitTasks(\$submitTask: SubmitTaskInput) {\n" +
                 "  submitTasks(submitTask: \$submitTask) {\n" +
                 "    massager\n" +
@@ -374,6 +376,8 @@ class ChecklistActivity : BasedActivity() {
         reqObject.add("headers", headersObject)
 //        Log.d("TestSendReport", "Check reqObject $reqObject")
 
+        showLoadingDialog(this)
+
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
             retrofit2.Callback<ResponseBody> {
@@ -382,6 +386,7 @@ class ChecklistActivity : BasedActivity() {
                     try {
                         val responseBody = response.body()?.string()
                         Log.d("TestSendReport", "Pass Test $responseBody")
+                        dismissLoadingDialog()
                     } catch (e: Exception) {
                         Log.e("TestSendReport", "Error parsing response body: $e")
                     }

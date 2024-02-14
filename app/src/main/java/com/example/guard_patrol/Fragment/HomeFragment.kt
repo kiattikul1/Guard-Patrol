@@ -36,9 +36,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -57,8 +59,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
     private var patrolPointList = ArrayList<Patrols>()
     private lateinit var gMap : GoogleMap
     private lateinit var map : FrameLayout
+    private lateinit var myLocation: LatLng
     private lateinit var clusterManager: ClusterManager<MyItem>
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -141,7 +143,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
                             patrolPointList.add(point)
                         }
                         cb.invoke()
-//                        Log.d("TestHomePatrol", "Check patrolPointList $patrolPointList")
+                        Log.d("TestHomePatrol", "Check patrolPointList $patrolPointList")
 
                     } catch (e: Exception) {
                         Log.e("TestHomePatrol", "Error parsing response body: $e")
@@ -164,20 +166,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
             // Get last known location
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 location?.let {
-                    val myLocation = LatLng(location.latitude, location.longitude)
-                    gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
-
+                    myLocation = LatLng(location.latitude, location.longitude)
                     val myMarker: MarkerOptions = MarkerOptions()
                         .position(myLocation).title("คุณอยู่ตรงนี้")
                         //TODO : Change icon
-                        .icon(bitmapFromVector(requireContext(),R.drawable.ic_my_location))
+//                        .icon(BitmapUtils.bitmapFromVector(requireContext(),R.drawable.ic_my_location))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
 
                     gMap.addMarker(myMarker)
                 }
-
-                setUpCluster()
-                val renderer = CustomClusterRenderer(requireContext(), googleMap, clusterManager)
-                clusterManager.renderer = renderer
+                setUpCluster(myLocation)
+                val render = CustomClusterRenderer(requireContext(), gMap, clusterManager)
+                // A cluster is active when there are 4 or more markers.
+                clusterManager.renderer = render
             }
         }
     }
@@ -199,60 +200,61 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
     }
 
     @SuppressLint("PotentialBehaviorOverride")
-    private fun setUpCluster() {
+    private fun setUpCluster(myLocation: LatLng) {
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 20f))
         clusterManager = ClusterManager(requireContext(), gMap)
         gMap.setOnCameraIdleListener(clusterManager)
         gMap.setOnMarkerClickListener(clusterManager)
         addItems()
     }
 
-
     private fun addItems() {
         for (point in patrolPointList) {
             val pointName = point.pointName
             val lat = point.lat?.toDouble()
             val lng = point.lng?.toDouble()
-            val patrolPoint = LatLng(lat!!, lng!!)
-            val pointMarker: MarkerOptions = MarkerOptions().position(patrolPoint).title(pointName.toString())
-            pointMarker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-//            gMap.addMarker(pointMarker)
-            //TODO : Change pointName and snippet
             val title = pointName!!
-            val snippet = "and this is the snippet."
-            val offsetItem = MyItem(lat, lng, title, snippet)
+            val offsetItem = MyItem(lat!!, lng!!, title)
             clusterManager.addItem(offsetItem)
         }
     }
 
-    private fun bitmapFromVector(context: Context, vectorResId: Int): BitmapDescriptor {
-        val vectorDrawable = ContextCompat.getDrawable(
-            context, vectorResId
-        )
-        vectorDrawable!!.setBounds(
-            0, 0, vectorDrawable.intrinsicWidth,
-            vectorDrawable.intrinsicHeight
-        )
-        val bitmap = Bitmap.createBitmap(
-            vectorDrawable.intrinsicWidth,
-            vectorDrawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        vectorDrawable.draw(canvas)
-        return BitmapDescriptorFactory.fromBitmap(bitmap)
+    // Change image to bitmap for create marker
+    object BitmapUtils {
+        fun bitmapFromVector(context: Context, vectorResId: Int): BitmapDescriptor {
+            val vectorDrawable = ContextCompat.getDrawable(
+                context, vectorResId
+            )
+            vectorDrawable!!.setBounds(
+                0,  0, vectorDrawable.intrinsicWidth,
+                vectorDrawable.intrinsicHeight
+            )
+            val bitmap = Bitmap.createBitmap(
+                vectorDrawable.intrinsicWidth,
+                vectorDrawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            vectorDrawable.draw(canvas)
+            return BitmapDescriptorFactory.fromBitmap(bitmap)
+        }
     }
 
     class CustomClusterRenderer(
-        //TODO : add color for Cluster
-        context: Context?,
+        private val context: Context,
         map: GoogleMap?,
         clusterManager: ClusterManager<MyItem>?
     ) : DefaultClusterRenderer<MyItem>(context, map, clusterManager) {
 
         override fun onBeforeClusterItemRendered(item: MyItem, markerOptions: MarkerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions)
-            // Set custom marker icon here
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+            val bitmapDescriptor = BitmapUtils.bitmapFromVector(context, R.drawable.ic_task)
+            markerOptions.icon(bitmapDescriptor)
+        }
+
+        // Change cluster color
+        override fun getColor(clusterSize: Int): Int {
+            return Color.rgb(255, 114, 51)
         }
     }
 
@@ -260,12 +262,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
         lat: Double,
         lng: Double,
         title: String,
-        snippet: String
     ) : ClusterItem {
 
         private val position: LatLng
         private val title: String
-        private val snippet: String
 
         override fun getPosition(): LatLng {
             return position
@@ -275,14 +275,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
             return title
         }
 
-        override fun getSnippet(): String {
-            return snippet
+        override fun getSnippet(): String? {
+            return null
         }
 
         init {
             position = LatLng(lat, lng)
             this.title = title
-            this.snippet = snippet
         }
     }
 

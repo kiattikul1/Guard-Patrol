@@ -2,13 +2,13 @@ package com.example.guard_patrol.Activity
 
 import BasedActivity
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,11 +20,6 @@ import com.example.guard_patrol.Data.AllService
 import com.example.guard_patrol.databinding.ActivityHistoryDetailBinding
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -46,6 +41,9 @@ class HistoryDetailActivity : BasedActivity() {
         binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+//        showFragmentLoadingDialog()
+        showLoadingDialog(this)
+
         //Back Button
         binding.btnBack.setOnClickListener{
             // Use onBackPressed() for back to HistoryActivity
@@ -63,6 +61,15 @@ class HistoryDetailActivity : BasedActivity() {
                 layoutManager = LinearLayoutManager(context)
                 setHasFixedSize(true)
                 adapter = taskAdapter
+                viewTreeObserver.addOnGlobalLayoutListener(
+                    object : ViewTreeObserver.OnGlobalLayoutListener {
+                        override fun onGlobalLayout() {
+                            viewTreeObserver.removeOnGlobalLayoutListener(this)
+//                            dismissFragmentLoadingDialog()
+                            dismissLoadingDialog()
+                        }
+                    }
+                )
             }
         }
 
@@ -78,8 +85,6 @@ class HistoryDetailActivity : BasedActivity() {
                 params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
                 params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
                 image.layoutParams = params
-                // TODO: Close progressDialog
-                loadingDialog.dismiss()
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -119,9 +124,6 @@ class HistoryDetailActivity : BasedActivity() {
         headersObject.addProperty("Authorization", "Bearer $token")
         reqObject.add("headers", headersObject)
 //        Log.d("TestDetailTaskHistory", "Check reqObject $reqObject")
-
-        // สร้างและแสดง Progress Dialog
-        loadingDialog = ProgressDialog.show(this, "Please wait.", "Loading...", true, false)
 
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
