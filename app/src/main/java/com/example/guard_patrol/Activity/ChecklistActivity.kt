@@ -332,8 +332,8 @@ class ChecklistActivity : BasedActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
-                    //TODO : do something
-                    Log.e("TestCameraX", "Photo capture failed: ${exc.message}", exc)
+                    Toast.makeText(applicationContext, "Photo capture failed", Toast.LENGTH_SHORT).show()
+//                    Log.e("TestCameraX", "Photo capture failed: ${exc.message}", exc)
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
