@@ -13,8 +13,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.guard_patrol.Class.Tasks
 import com.example.guard_patrol.databinding.CustomHistoryDetailTaskBinding
+import java.io.File
 
 @SuppressLint("NotifyDataSetChanged")
 class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -24,7 +27,6 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
             notifyDataSetChanged()
         }
 
-    var addImage: ((image: ImageView?,imageBitmap: String)-> Unit)? = null
     override fun getItemCount(): Int {
         return dataList.size
     }
@@ -34,11 +36,11 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
         return CustomHistoryDetailTaskViewHolder(binding)
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as? AdapterHistoryDetailTask.CustomHistoryDetailTaskViewHolder)?.bindTaskView(dataList[position],position)
+        (holder as? AdapterHistoryDetailTask.CustomHistoryDetailTaskViewHolder)?.bindTaskView(dataList[position])
     }
 
     inner class CustomHistoryDetailTaskViewHolder(private val binding : CustomHistoryDetailTaskBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bindTaskView(task: Tasks,position: Int) {
+        fun bindTaskView(task: Tasks) {
             binding.txtTask.text = task.titleTask
             binding.recyclerViewDetailCheckList.layoutManager = LinearLayoutManager(binding.root.context, LinearLayoutManager.VERTICAL, false)
 
@@ -62,24 +64,35 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
                 }
 
 //                Log.e("TestDetailTaskHistory", "Check bitmap position $position ${task.evidenceImages}")
-                val eImage1 = task.evidenceImages.getOrNull(0)
-                val eImage2 = task.evidenceImages.getOrNull(1)
-                val eImage3 = task.evidenceImages.getOrNull(2)
-                if (eImage1 == null){
+                if (!task.evidenceImages.isNullOrEmpty()) {
+                    val eImage1 = task.evidenceImages.getOrNull(0)
+                    if (eImage1 != null) {
+                        Glide.with(binding.root.context)
+                            .load(eImage1)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(binding.imageFirst)
+                    }
+                    val eImage2 = task.evidenceImages.getOrNull(1)
+                    if (eImage2 != null) {
+                        Glide.with(binding.root.context)
+                            .load(eImage2)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(binding.imageSecond)
+                    }else{
+                        binding.imagePicker2.visibility = View.GONE
+                    }
+                    val eImage3 = task.evidenceImages.getOrNull(2)
+                    if (eImage3 != null) {
+                        Glide.with(binding.root.context)
+                            .load(eImage3)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(binding.imageThird)
+                    }else{
+                        binding.imagePicker3.visibility = View.GONE
+                    }
+                }else{
                     binding.txtPhoto.visibility = View.GONE
                     binding.layoutImagePicker.visibility = View.GONE
-                }else{
-                    addImage?.invoke(binding.imageFirst,eImage1)
-                    if (eImage2 == null){
-                        binding.imagePicker2.visibility = View.GONE
-                    }else{
-                        addImage?.invoke(binding.imageSecond,eImage2)
-                        if (eImage3 == null){
-                            binding.imagePicker3.visibility = View.GONE
-                        }else{
-                            addImage?.invoke(binding.imageThird,eImage3)
-                        }
-                    }
                 }
 
                 binding.textAreaInformation.apply {

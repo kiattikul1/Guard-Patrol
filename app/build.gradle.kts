@@ -67,5 +67,12 @@ dependencies {
     implementation("com.google.maps.android:android-maps-utils:2.2.0")
     implementation("com.airbnb.android:lottie:3.4.0")
     implementation("com.github.emreesen27:Android-Nested-Progress:v1.0.2")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.vanniktech:android-image-cropper:4.5.0")
+    implementation("androidx.camera:camera-core:1.3.1")
+    implementation("androidx.camera:camera-camera2:1.3.1")
+    implementation("androidx.camera:camera-lifecycle:1.3.1")
+    implementation("androidx.camera:camera-view:1.3.1")
+
 
 }

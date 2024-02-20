@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.guard_patrol.Adapter.AdapterWorkspaceAll
@@ -96,7 +97,6 @@ class SelectWorkspaceActivity : BasedActivity() {
 
     //Add Workspace
     private fun addDataToList(){
-
         val query: String = "query PerformTask {\n" +
                 "  performTask {\n" +
                 "    workspace_all {\n" +
@@ -112,6 +112,8 @@ class SelectWorkspaceActivity : BasedActivity() {
 
         val reqObject = JsonObject()
         reqObject.addProperty("query",query)
+
+        showLoadingDialog(this)
 
         AllService.initialize(applicationContext)
         val retrofitService = AllService.getInstance()
@@ -160,6 +162,7 @@ class SelectWorkspaceActivity : BasedActivity() {
 //                                Log.d("Test WorkspaceList", "check $workspaceAllList")
                             }
                         }
+                        dismissLoadingDialog()
                     } catch (e: Exception) {
                         Log.e("TestGetWorkspace", "Error parsing response body: $e")
                     }

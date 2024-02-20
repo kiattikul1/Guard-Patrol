@@ -201,7 +201,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
 
     @SuppressLint("PotentialBehaviorOverride")
     private fun setUpCluster(myLocation: LatLng) {
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 20f))
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
         clusterManager = ClusterManager(requireContext(), gMap)
         gMap.setOnCameraIdleListener(clusterManager)
         gMap.setOnMarkerClickListener(clusterManager)

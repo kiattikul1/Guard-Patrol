@@ -41,7 +41,6 @@ class HistoryDetailActivity : BasedActivity() {
         binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        showFragmentLoadingDialog()
         showLoadingDialog(this)
 
         //Back Button
@@ -56,7 +55,7 @@ class HistoryDetailActivity : BasedActivity() {
         taskAdapter = AdapterHistoryDetailTask()
         listData(){
             taskAdapter.dataList = allTask
-            Log.d("TestDetailTaskHistory","Check allTask $allTask")
+//            Log.d("TestDetailTaskHistory","Check allTask $allTask")
             binding.recyclerViewCheckList.apply {
                 layoutManager = LinearLayoutManager(context)
                 setHasFixedSize(true)
@@ -65,29 +64,10 @@ class HistoryDetailActivity : BasedActivity() {
                     object : ViewTreeObserver.OnGlobalLayoutListener {
                         override fun onGlobalLayout() {
                             viewTreeObserver.removeOnGlobalLayoutListener(this)
-//                            dismissFragmentLoadingDialog()
                             dismissLoadingDialog()
                         }
                     }
                 )
-            }
-        }
-
-        taskAdapter.addImage = {image, imageBitmap ->
-            try {
-                val bitmap =  MyAsync(imageBitmap).execute().get()
-                val rotatedBitmap = rotateBitmap(bitmap, 90f)
-                image?.setImageBitmap(null)
-                image?.setImageBitmap(rotatedBitmap)
-
-                image?.scaleType = ImageView.ScaleType.CENTER_CROP
-                val params = image?.layoutParams as ConstraintLayout.LayoutParams
-                params.width = ConstraintLayout.LayoutParams.MATCH_PARENT
-                params.height = ConstraintLayout.LayoutParams.MATCH_PARENT
-                image.layoutParams = params
-
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
@@ -124,7 +104,6 @@ class HistoryDetailActivity : BasedActivity() {
         headersObject.addProperty("Authorization", "Bearer $token")
         reqObject.add("headers", headersObject)
 //        Log.d("TestDetailTaskHistory", "Check reqObject $reqObject")
-
         val retrofitService = AllService.getInstance()
         retrofitService.callGraphQLService(reqObject).enqueue(object:
             retrofit2.Callback<ResponseBody> {
@@ -176,30 +155,6 @@ class HistoryDetailActivity : BasedActivity() {
                 Log.e("TestDetailTaskHistory","Error $t")
             }
         })
-    }
-
-    // MyAsync สำหรับให้ระบบรอการทำงานส่วนนี้ก่อนค่อยไปทำส่วนอื่นต่อ
-    class MyAsync(private val src: String) : AsyncTask<Void, Void, Bitmap>() {
-
-        override fun doInBackground(vararg params: Void?): Bitmap? {
-            return try {
-                val url = URL(src)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.doInput = true
-                connection.connect()
-                val input: InputStream = connection.inputStream
-                BitmapFactory.decodeStream(input)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                null
-            }
-        }
-    }
-
-    private fun rotateBitmap(source: Bitmap?, angle: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(angle)
-        return Bitmap.createBitmap(source!!, 0, 0, source.width, source.height, matrix, true)
     }
 
 }
