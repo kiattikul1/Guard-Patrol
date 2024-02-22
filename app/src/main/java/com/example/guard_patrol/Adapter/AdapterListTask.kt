@@ -103,21 +103,30 @@ class AdapterListTask(private var actionCamera: ((id: String,position: Int,image
                 actionCamera?.invoke(binding.imageThird.id.toString(),position,binding.imageThird)
             }
 
+            //TODO : fix remark
             val textWatcher = RemarkTextWatcher(position)
             binding.textAreaInformation.addTextChangedListener(textWatcher)
-            if (binding.textAreaInformation.text == null || binding.textAreaInformation.text.toString() == ""){
-                binding.txtNote.setTextColor(Color.RED)
-                binding.roundedEditText.apply {
-                    strokeLineColor = Color.RED
-                    strokeLineWidth = 10F
+            binding.txtNote.setTextColor(Color.RED)
+
+            binding.textAreaInformation.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable) {
+                    if (binding.textAreaInformation.text == null || binding.textAreaInformation.text.toString() == ""){
+                        binding.txtNote.setTextColor(Color.RED)
+                        binding.roundedEditText.apply {
+                            strokeLineColor = Color.RED
+                            strokeLineWidth = 10F
+                        }
+                    }else{
+                        binding.txtNote.setTextColor(Color.BLACK)
+                        binding.roundedEditText.apply {
+                            strokeLineColor = Color.BLACK
+                            strokeLineWidth = 5F
+                        }
+                    }
                 }
-            }else{
-                binding.txtNote.setTextColor(Color.BLACK)
-                binding.roundedEditText.apply {
-                    strokeLineColor = Color.BLACK
-                    strokeLineWidth = 5F
-                }
-            }
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            })
         }
     }
 
@@ -126,7 +135,6 @@ class AdapterListTask(private var actionCamera: ((id: String,position: Int,image
             binding.txtBtn.text = "ส่งรายงาน"
             binding.btnSentReport.setOnClickListener {
                 actionSubmitForm?.invoke()
-                notifyDataSetChanged()
             }
         }
     }

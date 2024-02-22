@@ -13,8 +13,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class AllService {
     companion object {
-//        private const val baseUrl = "http://10.2.98.228:4000/"
-        private const val baseUrl = "http://192.168.173.232:4000/"
+        private const val baseUrl = "http://10.2.98.228:4000/"
+//        private const val baseUrl = "http://192.168.173.232:4000/"
 
         private var retrofitService: GraphQLService? = null
         private var retrofitServiceAPI: RestAPIService? = null

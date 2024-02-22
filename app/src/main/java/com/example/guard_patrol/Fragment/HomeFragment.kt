@@ -169,15 +169,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
                     myLocation = LatLng(location.latitude, location.longitude)
                     val myMarker: MarkerOptions = MarkerOptions()
                         .position(myLocation).title("คุณอยู่ตรงนี้")
-                        //TODO : Change icon
-//                        .icon(BitmapUtils.bitmapFromVector(requireContext(),R.drawable.ic_my_location))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                        .icon(BitmapUtils.bitmapFromVector(requireContext(),R.drawable.user_marker))
+//                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
 
                     gMap.addMarker(myMarker)
                 }
                 setUpCluster(myLocation)
                 val render = CustomClusterRenderer(requireContext(), gMap, clusterManager)
-                // A cluster is active when there are 4 or more markers.
                 clusterManager.renderer = render
             }
         }
@@ -240,6 +238,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
         }
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     class CustomClusterRenderer(
         private val context: Context,
         map: GoogleMap?,
@@ -255,6 +254,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
         // Change cluster color
         override fun getColor(clusterSize: Int): Int {
             return Color.rgb(255, 114, 51)
+        }
+
+        override fun shouldRenderAsCluster(cluster: Cluster<MyItem>): Boolean {
+            return cluster.size > 1
         }
     }
 

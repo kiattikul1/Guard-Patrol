@@ -3,6 +3,7 @@ package com.example.guard_patrol.Activity
 import BasedActivity
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.ContextWrapper
@@ -11,40 +12,34 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.Matrix
+import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
-import android.os.Looper
-import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.OrientationEventListener
+import android.view.ScaleGestureDetector
 import android.view.Surface
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.AspectRatio
 import androidx.camera.core.*
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -60,6 +55,7 @@ import com.example.guard_patrol.Class.TaskClass
 import com.example.guard_patrol.Data.AllService
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityChecklistBinding
+import com.google.android.material.internal.ViewUtils.hideKeyboard
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -71,13 +67,14 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 
 @SuppressLint("SetTextI18n")
 class ChecklistActivity : BasedActivity() {
@@ -102,6 +99,9 @@ class ChecklistActivity : BasedActivity() {
     private var orientationEventListener: OrientationEventListener? = null
     private var lensFacing = CameraSelector.LENS_FACING_BACK
     private var aspectRatio = AspectRatio.RATIO_16_9
+    private lateinit var cameraPreview: PreviewView
+    private var lastClickTime = 0L
+    private val doubleClickDelay = 500L // milliseconds
 
     private var cropImage = registerForActivityResult(CropImageContract()
     ) { result: CropImageView.CropResult ->
@@ -109,14 +109,10 @@ class ChecklistActivity : BasedActivity() {
             try {
                 val cropped =
                     BitmapFactory.decodeFile(result.getUriFilePath(applicationContext, true))
-                // Add a button to parse the result here
-                val maxWidth = 800 // Set the maximum width
-                val maxHeight = 800 // Set the maximum height
-                val scaledBitmap = Bitmap.createScaledBitmap(cropped, maxWidth, maxHeight, true)
 
                 if(captureIV != null){
                     captureIV!!.setImageBitmap(null)
-                    captureIV!!.setImageBitmap(scaledBitmap)
+                    captureIV!!.setImageBitmap(cropped)
 
                     //Fill image in ConstraintLayout
                     captureIV!!.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -127,7 +123,7 @@ class ChecklistActivity : BasedActivity() {
                 }
 
                 if (cropped != null) {
-                    saveImage(scaledBitmap)
+                    saveImage(cropped)
 
                     val wrapper = ContextWrapper(this)
                     var newImageFile = wrapper.getDir("myCapturedImages", Context.MODE_PRIVATE)
@@ -137,7 +133,7 @@ class ChecklistActivity : BasedActivity() {
                     if (newImageFile.exists()) newImageFile.delete()
                     // Create a new file
                     val stream: OutputStream = FileOutputStream(newImageFile)
-                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+                    cropped.compress(Bitmap.CompressFormat.JPEG, 90, stream)
                     stream.flush()
                     stream.close()
 
@@ -166,6 +162,8 @@ class ChecklistActivity : BasedActivity() {
         binding = ActivityChecklistBinding.inflate(layoutInflater)
         setContentView(binding.root)
         checkAndRequestStoragePermission(this)
+
+        cameraPreview = binding.cameraPreview
 
         //Back Button
         binding.btnBack.setOnClickListener{
@@ -212,12 +210,14 @@ class ChecklistActivity : BasedActivity() {
             idImage = id
             positionImage = position
             captureIV = image
+            hideKeyboard()
             startCamera()
 
         },actionSendRemarks = { position, remark ->
             cellTypeList[position].remark = remark
 
         }, actionSubmitForm = {
+            showLoadingDialog(this)
             val dataItems = cellTypeList.filter { it.cellType == CellType.TASK }
             var errorDialogShown = false
             val tasksArray = JsonArray()
@@ -232,6 +232,7 @@ class ChecklistActivity : BasedActivity() {
                     val iconResId = R.drawable.ic_error
                     showCustomErrorDialogBox(title, message, iconResId)
                     errorDialogShown = true
+                    dismissLoadingDialog()
                 } else {
                     if (data.isNormal == false) {
                         if ((data.remark == null || data.remark == "") && !errorDialogShown){
@@ -240,12 +241,14 @@ class ChecklistActivity : BasedActivity() {
                             val iconResId = R.drawable.ic_error
                             showCustomErrorDialogBox(title, message, iconResId)
                             errorDialogShown = true
+                            dismissLoadingDialog()
                         } else {
                             taskObject.addProperty("remark", data.remark)
+                            tasksArray.add(taskObject)
                         }
+                    }else{
+                        tasksArray.add(taskObject)
                     }
-
-                    tasksArray.add(taskObject)
                 }
             }
 
@@ -273,40 +276,19 @@ class ChecklistActivity : BasedActivity() {
                                     }
                                 }
                             }
-//                            Log.d("TestSendReport Status False ","Check $tasksArray")
-                            showLoadingDialog(this)
-//                            sendReport(tasksArray)
-                            Handler(Looper.getMainLooper()).postDelayed(
-                                {
-                                    dismissLoadingDialog()
-                                    showCustomPassDialogBox()
-                                },
-                                5000 // value in milliseconds
-                            )
+                            Log.d("TestSendReport Status False ","Check $tasksArray")
+                            sendReport(tasksArray)
+                            showCustomPassDialogBox()
                         }
                     }else{
-//                        Log.d("TestSendReport Status False ","Check $tasksArray")
-                        showLoadingDialog(this)
-//                        sendReport(tasksArray)
-                        Handler(Looper.getMainLooper()).postDelayed(
-                            {
-                                dismissLoadingDialog()
-                                showCustomPassDialogBox()
-                            },
-                            5000 // value in milliseconds
-                        )
+                        Log.d("TestSendReport Status False ","Check $tasksArray")
+                        sendReport(tasksArray)
+                        showCustomPassDialogBox()
                     }
                 }else{
-//                    Log.d("TestSendReport Status True ","Check $tasksArray")
-                    showLoadingDialog(this)
-//                    sendReport(tasksArray)
-                    Handler(Looper.getMainLooper()).postDelayed(
-                        {
-                            dismissLoadingDialog()
-                            showCustomPassDialogBox()
-                        },
-                        5000 // value in milliseconds
-                    )
+                    Log.d("TestSendReport Status True ","Check $tasksArray")
+                    sendReport(tasksArray)
+                    showCustomPassDialogBox()
                 }
             }
         })
@@ -321,6 +303,13 @@ class ChecklistActivity : BasedActivity() {
     }
 
     private fun takePhoto() {
+        // Protect double click
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastClickTime < doubleClickDelay) {
+            return
+        }
+        lastClickTime = currentTime
+        showLoadingDialog(this)
         val imageCapture = imageCapture ?: return
         val photoFile = File(
             outputDirectory,
@@ -332,6 +321,7 @@ class ChecklistActivity : BasedActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
+                    dismissLoadingDialog()
                     Toast.makeText(applicationContext, "Photo capture failed", Toast.LENGTH_SHORT).show()
 //                    Log.e("TestCameraX", "Photo capture failed: ${exc.message}", exc)
                 }
@@ -342,33 +332,32 @@ class ChecklistActivity : BasedActivity() {
                     cropImageOptions.imageSourceIncludeGallery = true
                     cropImageOptions.imageSourceIncludeCamera = true
                     cropImageOptions.allowRotation = true
+                    cropImageOptions.fixAspectRatio = true
+                    cropImageOptions.maxCropResultHeight = 2048
+                    cropImageOptions.maxCropResultWidth = 2048
                     val cropImageContractOptions  = CropImageContractOptions (imageUri, cropImageOptions)
+                    dismissLoadingDialog()
                     cropImage.launch(cropImageContractOptions)
                 }
             })
     }
 
-    private fun setFlashIcon(camera: Camera) {
-        if (camera.cameraInfo.hasFlashUnit()) {
-            if (camera.cameraInfo.torchState.value == 0) {
-                camera.cameraControl.enableTorch(true)
-                binding.toggleFlash.setImageResource(R.drawable.baseline_flash_off_24)
-            } else {
-                camera.cameraControl.enableTorch(false)
-                binding.toggleFlash.setImageResource(R.drawable.baseline_flash_on_24)
-            }
-        } else {
-            Toast.makeText(
-                this,
-                "Flash is Not Available",
-                Toast.LENGTH_LONG
-            ).show()
-            binding.toggleFlash.isEnabled = false
+    @SuppressLint("ClickableViewAccessibility")
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        binding.layoutCameraX.apply {
+            visibility = View.VISIBLE
+            setOnTouchListener{view, event ->
+                true}
         }
+        cameraProviderFuture.addListener({
+            cameraProvider = cameraProviderFuture.get()
+            bindCameraUserCases()
+        }, ContextCompat.getMainExecutor(this))
     }
 
     private fun bindCameraUserCases() {
-        val rotation = binding.cameraPreview.display.rotation
+        val rotation = cameraPreview.display.rotation
 
         val resolutionSelector = ResolutionSelector.Builder()
             .setAspectRatioStrategy(
@@ -384,7 +373,7 @@ class ChecklistActivity : BasedActivity() {
             .setTargetRotation(rotation)
             .build()
             .also {
-                it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
+                it.setSurfaceProvider(cameraPreview.surfaceProvider)
             }
         imageCapture = ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
@@ -416,24 +405,66 @@ class ChecklistActivity : BasedActivity() {
             camera = cameraProvider.bindToLifecycle(
                 this, cameraSelector, preview, imageCapture
             )
-//            setUpZoomTapToFocus()
+            setUpZoomTapToFocus()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        binding.layoutCameraX.apply {
-            visibility = View.VISIBLE
-            setOnTouchListener{view, event ->
-                true}
+    private fun setUpZoomTapToFocus(){
+        val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener(){
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val currentZoomRatio = camera.cameraInfo.zoomState.value?.zoomRatio  ?: 1f
+                val delta = detector.scaleFactor
+                camera.cameraControl.setZoomRatio(currentZoomRatio * delta)
+                return true
+            }
         }
-        cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
-            bindCameraUserCases()
-        }, ContextCompat.getMainExecutor(this))
+
+        val scaleGestureDetector = ScaleGestureDetector(this,listener)
+
+        cameraPreview.setOnTouchListener { view, event ->
+            scaleGestureDetector.onTouchEvent(event)
+            if (event.action == MotionEvent.ACTION_DOWN){
+                val factory = cameraPreview.meteringPointFactory
+                val point = factory.createPoint(event.x,event.y)
+                val action = FocusMeteringAction.Builder(point,FocusMeteringAction.FLAG_AF)
+                    .setAutoCancelDuration(2, TimeUnit.SECONDS)
+                    .build()
+
+                val x = event.x
+                val y = event.y
+
+                val focusCircle = RectF(x-50,y-50, x+50,y+50)
+
+                binding.focusCircleView.focusCircle = focusCircle
+                binding.focusCircleView.invalidate()
+
+                camera.cameraControl.startFocusAndMetering(action)
+
+                view.performClick()
+            }
+            true
+        }
+    }
+
+    private fun setFlashIcon(camera: Camera) {
+        if (camera.cameraInfo.hasFlashUnit()) {
+            if (camera.cameraInfo.torchState.value == 0) {
+                camera.cameraControl.enableTorch(true)
+                binding.toggleFlash.setImageResource(R.drawable.baseline_flash_off_24)
+            } else {
+                camera.cameraControl.enableTorch(false)
+                binding.toggleFlash.setImageResource(R.drawable.baseline_flash_on_24)
+            }
+        } else {
+            Toast.makeText(
+                this,
+                "Flash is Not Available",
+                Toast.LENGTH_LONG
+            ).show()
+            binding.toggleFlash.isEnabled = false
+        }
     }
 
     // creates a folder inside internal storage
@@ -575,7 +606,7 @@ class ChecklistActivity : BasedActivity() {
                 if (response.isSuccessful) {
                     try {
                         val responseBody = response.body()?.string()
-                        Log.d("TestSendReport", "Pass Test $responseBody")
+//                        Log.d("TestSendReport", "Pass Test $responseBody")
                         dismissLoadingDialog()
                     } catch (e: Exception) {
                         Log.e("TestSendReport", "Error parsing response body: $e")
@@ -585,6 +616,7 @@ class ChecklistActivity : BasedActivity() {
                 }
             }
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                dismissLoadingDialog()
                 Log.e("TestSendReport","Error $t")
             }
         })
@@ -736,25 +768,8 @@ class ChecklistActivity : BasedActivity() {
         }
     }
 
-    // Function to rotate a Bitmap
-    private fun rotateBitmap(source: Bitmap?, angle: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(angle)
-        return Bitmap.createBitmap(source!!, 0, 0, source.width, source.height, matrix, true)
+    @SuppressLint("RestrictedApi")
+    fun Activity.hideKeyboard() {
+        hideKeyboard(currentFocus ?: View(this))
     }
-
-    private fun getImageOrientation(context: Context, imageUri: Uri): Int {
-        val cursor = context.contentResolver.query(imageUri, arrayOf(MediaStore.Images.ImageColumns.ORIENTATION), null, null, null)
-        cursor.use { c ->
-            if (c != null && c.moveToFirst()) {
-                val orientationColumnIndex = c.getColumnIndex(MediaStore.Images.ImageColumns.ORIENTATION)
-                if (orientationColumnIndex != -1) {
-                    return c.getInt(orientationColumnIndex)
-                }
-            }
-        }
-        return 0
-    }
-
-
 }

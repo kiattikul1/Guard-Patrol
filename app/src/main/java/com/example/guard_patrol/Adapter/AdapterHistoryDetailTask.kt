@@ -1,26 +1,19 @@
 package com.example.guard_patrol.Adapter
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.Matrix
-import android.util.Base64
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.guard_patrol.Class.Tasks
 import com.example.guard_patrol.databinding.CustomHistoryDetailTaskBinding
-import java.io.File
 
 @SuppressLint("NotifyDataSetChanged")
-class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class AdapterHistoryDetailTask(private var showImage: ((imageUrl: String)-> Unit)? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var dataList = ArrayList<Tasks>()
         set(value) {
             field = value
@@ -71,25 +64,37 @@ class AdapterHistoryDetailTask : RecyclerView.Adapter<RecyclerView.ViewHolder>()
                             .load(eImage1)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .into(binding.imageFirst)
+                        binding.imagePicker1.setOnClickListener {
+                            showImage?.invoke(eImage1)
+                        }
                     }
+
                     val eImage2 = task.evidenceImages.getOrNull(1)
                     if (eImage2 != null) {
                         Glide.with(binding.root.context)
                             .load(eImage2)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .into(binding.imageSecond)
+                        binding.imagePicker2.setOnClickListener {
+                            showImage?.invoke(eImage2)
+                        }
                     }else{
                         binding.imagePicker2.visibility = View.GONE
                     }
+
                     val eImage3 = task.evidenceImages.getOrNull(2)
                     if (eImage3 != null) {
                         Glide.with(binding.root.context)
                             .load(eImage3)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .into(binding.imageThird)
+                        binding.imagePicker3.setOnClickListener {
+                            showImage?.invoke(eImage3)
+                        }
                     }else{
                         binding.imagePicker3.visibility = View.GONE
                     }
+
                 }else{
                     binding.txtPhoto.visibility = View.GONE
                     binding.layoutImagePicker.visibility = View.GONE

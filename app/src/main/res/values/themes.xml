@@ -2,7 +2,9 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.GuardPatrol" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">#FF000000</item>
+        <item name="colorPrimaryDark">#FF000000</item>
+        <item name="colorAccent">#FF000000</item>
     </style>
 
     <style name="Theme.GuardPatrol" parent="Base.Theme.GuardPatrol" />

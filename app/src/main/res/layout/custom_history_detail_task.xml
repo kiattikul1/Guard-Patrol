@@ -158,6 +158,8 @@
                     android:layout_height="90dp"
                     app:backgroundColor="#F3F2F2"
                     app:cornerAll="4dp"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
                     app:strokeLineColor="@color/black"
                     app:strokeLineWidth="2dp">
 
@@ -186,6 +188,8 @@
                     app:backgroundColor="#F3F2F2"
                     app:cornerAll="4dp"
                     android:layout_marginHorizontal="16dp"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
                     app:strokeLineColor="@color/black"
                     app:strokeLineWidth="2dp">
 
@@ -213,6 +217,8 @@
                     android:layout_height="90dp"
                     app:backgroundColor="#F3F2F2"
                     app:cornerAll="4dp"
+                    android:clickable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
                     app:strokeLineColor="@color/black"
                     app:strokeLineWidth="2dp">
 

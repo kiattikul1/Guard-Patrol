@@ -97,11 +97,12 @@
                 android:id="@+id/recyclerViewCheckList"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                app:layout_constraintWidth_percent="0.85"
-                android:layout_marginTop="24dp"
                 android:nestedScrollingEnabled="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.491"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintWidth_percent="0.85"
+                tools:layout_editor_absoluteY="25dp">
 
             </androidx.recyclerview.widget.RecyclerView>
 
@@ -113,13 +114,26 @@
         android:id="@+id/layoutCameraX"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:visibility="visible"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <androidx.camera.view.PreviewView
             android:id="@+id/cameraPreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.example.guard_patrol.FocusCircleView
+            android:id="@+id/focusCircleView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="@+id/cameraPreview"
+            app:layout_constraintBottom_toBottomOf="@+id/cameraPreview"
+            app:layout_constraintEnd_toEndOf="@+id/cameraPreview"
+            app:layout_constraintStart_toStartOf="@+id/cameraPreview" />
 
         <ImageButton
             android:id="@+id/capture"

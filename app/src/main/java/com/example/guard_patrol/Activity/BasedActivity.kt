@@ -24,6 +24,7 @@ open class BasedActivity: AppCompatActivity() {
         if (progressBar == null) {
             dialog = Dialog(context)
             dialog.apply {
+                setCanceledOnTouchOutside(false)
                 setCancelable(false)
                 setContentView(R.layout.custom_dialog_loading)
                 window?.setBackgroundDrawableResource(android.R.color.transparent);

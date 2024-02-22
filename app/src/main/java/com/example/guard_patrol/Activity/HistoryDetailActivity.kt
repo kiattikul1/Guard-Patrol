@@ -2,16 +2,18 @@ package com.example.guard_patrol.Activity
 
 import BasedActivity
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.os.AsyncTask
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewTreeObserver
+import android.view.Window
 import android.widget.ImageView
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.RelativeLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.guard_patrol.Adapter.AdapterHistoryDetailTask
 import com.example.guard_patrol.Class.HistoryDetailClass
 import com.example.guard_patrol.Class.SOPS
@@ -23,10 +25,6 @@ import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
 
 
 @SuppressLint("SetTextI18n")
@@ -52,7 +50,9 @@ class HistoryDetailActivity : BasedActivity() {
         pointId = intent.getStringExtra("PointId").toString()
         workspaceAt = intent.getStringExtra("WorkspaceAt").toString()
 
-        taskAdapter = AdapterHistoryDetailTask()
+        taskAdapter = AdapterHistoryDetailTask(showImage = { imageUrl ->
+            showImage(imageUrl)
+        })
         listData(){
             taskAdapter.dataList = allTask
 //            Log.d("TestDetailTaskHistory","Check allTask $allTask")
@@ -118,6 +118,7 @@ class HistoryDetailActivity : BasedActivity() {
                         listTask?.tasks?.forEach { task ->
                             val taskId = task.id
                             val titleTask = task.titleTask
+                            Log.d("TestDetailTaskHistory", "titleTask $titleTask")
                             val sops = task.sops!!
                             val listSop = ArrayList<SOPS>()
                             sops.forEach { sop ->
@@ -138,8 +139,8 @@ class HistoryDetailActivity : BasedActivity() {
                                 remark = task.remark.toString()
                             }
                             allTask.add(Tasks(taskId,titleTask,listSop,isNormal,evidenceImages,remark))
+                            Log.d("TestDetailTaskHistory", "Check allTask $allTask")
                         }
-
                         binding.txtWorkspace.text = "ไซต์ : ${listTask?.workspace}"
                         binding.txtPoint.text = "จุดที่ลาดตระเวน : ${listTask?.pointName}"
                         cb.invoke()
@@ -155,6 +156,28 @@ class HistoryDetailActivity : BasedActivity() {
                 Log.e("TestDetailTaskHistory","Error $t")
             }
         })
+    }
+
+    private fun showImage(imageUrl: String) {
+        val builder = Dialog(this)
+        builder.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        builder.window!!.setBackgroundDrawable(
+            ColorDrawable(Color.TRANSPARENT)
+        )
+        builder.setOnDismissListener {
+            //nothing;
+        }
+        val imageView = ImageView(this)
+        Glide.with(imageView.context)
+            .load(imageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(imageView)
+        builder.addContentView(
+            imageView, RelativeLayout.LayoutParams(
+                800, 800
+            )
+        )
+        builder.show()
     }
 
 }
