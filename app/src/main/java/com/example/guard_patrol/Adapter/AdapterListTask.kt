@@ -103,11 +103,9 @@ class AdapterListTask(private var actionCamera: ((id: String,position: Int,image
                 actionCamera?.invoke(binding.imageThird.id.toString(),position,binding.imageThird)
             }
 
-            //TODO : fix remark
             val textWatcher = RemarkTextWatcher(position)
             binding.textAreaInformation.addTextChangedListener(textWatcher)
             binding.txtNote.setTextColor(Color.RED)
-
             binding.textAreaInformation.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable) {
                     if (binding.textAreaInformation.text == null || binding.textAreaInformation.text.toString() == ""){

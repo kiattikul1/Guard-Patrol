@@ -14,9 +14,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.guard_patrol.Activity.HistoryActivity
 import com.example.guard_patrol.Activity.ScannerActivity
 import com.example.guard_patrol.Activity.SelectWorkspaceActivity
@@ -44,6 +48,7 @@ import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import com.squareup.picasso.Picasso
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -60,7 +65,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
     private lateinit var gMap : GoogleMap
     private lateinit var map : FrameLayout
     private lateinit var myLocation: LatLng
-    private lateinit var clusterManager: ClusterManager<MyItem>
+    private lateinit var clusterManager: ClusterManager<PatrolPointClass>
+    private val PERMISSION_REQUEST_CODE = 123
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -158,29 +164,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
         })
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
-    override fun onMapReady(googleMap: GoogleMap) {
-        this.gMap = googleMap
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // Get last known location
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    myLocation = LatLng(location.latitude, location.longitude)
-                    val myMarker: MarkerOptions = MarkerOptions()
-                        .position(myLocation).title("คุณอยู่ตรงนี้")
-                        .icon(BitmapUtils.bitmapFromVector(requireContext(),R.drawable.user_marker))
-//                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-
-                    gMap.addMarker(myMarker)
-                }
-                setUpCluster(myLocation)
-                val render = CustomClusterRenderer(requireContext(), gMap, clusterManager)
-                clusterManager.renderer = render
-            }
-        }
-    }
-
     // Request location permissions if not granted
     private fun requestLocationPermissions() {
         ActivityCompat.requestPermissions(
@@ -193,28 +176,71 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
         )
     }
 
-    companion object {
-        private const val PERMISSION_REQUEST_CODE = 123
-    }
-
     @SuppressLint("PotentialBehaviorOverride")
-    private fun setUpCluster(myLocation: LatLng) {
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
-        clusterManager = ClusterManager(requireContext(), gMap)
-        gMap.setOnCameraIdleListener(clusterManager)
-        gMap.setOnMarkerClickListener(clusterManager)
-        addItems()
+    override fun onMapReady(googleMap: GoogleMap) {
+        gMap = googleMap
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Get last known location
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    myLocation = LatLng(location.latitude, location.longitude)
+                    val myMarker: MarkerOptions = MarkerOptions()
+                        .position(myLocation)
+                        .title("คุณอยู่ตรงนี้")
+                        .icon(BitmapUtils.bitmapFromVector(requireContext(),R.drawable.user_marker))
+                    gMap.addMarker(myMarker)
+                    gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 20f))
+
+                    // Set up clustering
+                    clusterManager = ClusterManager(requireContext(), gMap)
+                    gMap.setOnCameraIdleListener(clusterManager)
+                    gMap.setOnMarkerClickListener(clusterManager)
+                    clusterManager.renderer = CustomClusterRenderer(requireContext(), gMap, clusterManager)
+                    addItems()
+                }
+            }
+        }
     }
 
     private fun addItems() {
+        var count = 0
+        //TODO : Change get image from api
         for (point in patrolPointList) {
-            val pointName = point.pointName
             val lat = point.lat?.toDouble()
             val lng = point.lng?.toDouble()
-            val title = pointName!!
-            val offsetItem = MyItem(lat!!, lng!!, title)
+            val title = point.pointName
+            val imageUrl: String = if (count == 1){
+                "https://firebasestorage.googleapis.com/v0/b/guardpatrol-e250b.appspot.com/o/images%2F6bd00aa5-675a-40bb-80a5-bd76b7657440.jpg?alt=media"
+            }else{
+                "https://firebasestorage.googleapis.com/v0/b/guardpatrol-e250b.appspot.com/o/images%2Fbd861fe5-f79f-4916-a3b1-698af4fbb4a8.jpg?alt=media"
+            }
+            val offsetItem = PatrolPointClass(lat!!, lng!!, title!!, imageUrl)
             clusterManager.addItem(offsetItem)
+            count++
         }
+
+        clusterManager.markerCollection.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
+            override fun getInfoWindow(marker: Marker): View? {
+                return null
+            }
+            override fun getInfoContents(marker: Marker): View? {
+                val markerView = layoutInflater.inflate(R.layout.custom_info_window_layout, null)
+                val imageView = markerView.findViewById<ImageView>(R.id.imageView)
+                val titleView = markerView.findViewById<TextView>(R.id.title)
+                try {
+                    titleView.text = marker.title
+                    Picasso.get()
+                        .load(marker.snippet)
+                        .error(R.mipmap.ic_launcher)
+                        .into(imageView)
+                }catch(e: Exception){
+                    Log.e("TestAddInfoMarker", "Error : $e")
+                }
+                return markerView
+            }
+        })
+        clusterManager.cluster()
     }
 
     // Change image to bitmap for create marker
@@ -239,13 +265,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
     }
 
     @SuppressLint("PotentialBehaviorOverride")
-    class CustomClusterRenderer(
+        class CustomClusterRenderer(
         private val context: Context,
         map: GoogleMap?,
-        clusterManager: ClusterManager<MyItem>?
-    ) : DefaultClusterRenderer<MyItem>(context, map, clusterManager) {
+        clusterManager: ClusterManager<PatrolPointClass>?
+    ) : DefaultClusterRenderer<PatrolPointClass>(context, map, clusterManager) {
 
-        override fun onBeforeClusterItemRendered(item: MyItem, markerOptions: MarkerOptions) {
+        override fun onBeforeClusterItemRendered(item: PatrolPointClass, markerOptions: MarkerOptions) {
             super.onBeforeClusterItemRendered(item, markerOptions)
             val bitmapDescriptor = BitmapUtils.bitmapFromVector(context, R.drawable.ic_task)
             markerOptions.icon(bitmapDescriptor)
@@ -256,37 +282,33 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
             return Color.rgb(255, 114, 51)
         }
 
-        override fun shouldRenderAsCluster(cluster: Cluster<MyItem>): Boolean {
+        override fun shouldRenderAsCluster(cluster: Cluster<PatrolPointClass>): Boolean {
             return cluster.size > 1
         }
     }
 
-    inner class MyItem(
-        lat: Double,
-        lng: Double,
-        title: String,
+    inner class PatrolPointClass(
+        private val lat: Double,
+        private val lng: Double,
+        private val title: String,
+        private val imageUrl: String
     ) : ClusterItem {
 
-        private val position: LatLng
-        private val title: String
-
         override fun getPosition(): LatLng {
-            return position
+            return LatLng(lat, lng)
         }
 
         override fun getTitle(): String {
             return title
         }
 
-        override fun getSnippet(): String? {
-            return null
+        override fun getSnippet(): String {
+            return imageUrl
         }
 
-        init {
-            position = LatLng(lat, lng)
-            this.title = title
+        fun getImageUrl(): String {
+            return imageUrl
         }
+
     }
-
-
 }

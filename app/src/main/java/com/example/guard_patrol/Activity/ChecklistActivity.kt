@@ -730,7 +730,6 @@ class ChecklistActivity : BasedActivity() {
                             val jsonObject = responseBody?.let { JSONObject(it) }
                             val imagesUrlArray = jsonObject?.getJSONArray("imagesUrl")
 //                            Log.d("TestImageURL", "Check imagesUrlArray $imagesUrlArray")
-
                             if (imagesUrlArray != null) {
                                 for (i in 0 until imagesUrlArray.length()) {
                                     val imageUrl = imagesUrlArray.getString(i)
@@ -746,7 +745,6 @@ class ChecklistActivity : BasedActivity() {
                         Log.e("TestImageURL", "Error: ${response.code()}")
                     }
                 }
-
                 override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                     Log.e("TestImageURL", "Failure: $t")
                 }
