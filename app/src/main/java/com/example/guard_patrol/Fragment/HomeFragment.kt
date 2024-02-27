@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.guard_patrol.Activity.EmergencyCallActivity
 import com.example.guard_patrol.Activity.HistoryActivity
 import com.example.guard_patrol.Activity.ScannerActivity
 import com.example.guard_patrol.Activity.SelectWorkspaceActivity
@@ -92,6 +93,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
         }
         binding.buttonHistory.setOnClickListener {
             val intent = Intent(requireContext(), HistoryActivity::class.java)
+            startActivity(intent)
+        }
+        binding.buttonEmergencyCall.setOnClickListener {
+            val intent = Intent(requireContext(), EmergencyCallActivity::class.java)
             startActivity(intent)
         }
 

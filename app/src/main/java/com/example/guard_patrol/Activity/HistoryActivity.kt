@@ -120,8 +120,6 @@ class HistoryActivity : BasedActivity() {
 //                        Log.d("TestQlHistory", "Pass Test $responseBody")
                         val gson = Gson()
                         val historyResponse = gson.fromJson(responseBody, HistoryClass::class.java)
-                        val workspaceName = historyResponse.data?.history?.workspace
-//                        Log.d("TestQlHistory", "Check workspaceName $workspaceName")
                         val patrolList = historyResponse.data?.history
 //                        Log.d("TestQlHistory", "Check patrolList $patrolList")
                         val historyPatrol = ArrayList<Patrol>()
