@@ -18,7 +18,7 @@ import com.example.guard_patrol.Adapter.AdapterHistoryDetailTask
 import com.example.guard_patrol.Class.HistoryDetailClass
 import com.example.guard_patrol.Class.SOPS
 import com.example.guard_patrol.Class.Tasks
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.databinding.ActivityHistoryDetailBinding
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -39,7 +39,7 @@ class HistoryDetailActivity : BasedActivity() {
         binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        showLoadingDialog(this)
+        loadingDialog.showLoadingDialog(this)
 
         //Back Button
         binding.btnBack.setOnClickListener{
@@ -64,7 +64,7 @@ class HistoryDetailActivity : BasedActivity() {
                     object : ViewTreeObserver.OnGlobalLayoutListener {
                         override fun onGlobalLayout() {
                             viewTreeObserver.removeOnGlobalLayoutListener(this)
-                            dismissLoadingDialog()
+                            loadingDialog.dismissLoadingDialog()
                         }
                     }
                 )

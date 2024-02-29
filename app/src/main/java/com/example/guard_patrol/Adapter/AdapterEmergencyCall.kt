@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.guard_patrol.Class.SelectEmergency
-import com.example.guard_patrol.databinding.CustomDateSelectBinding
 import com.example.guard_patrol.databinding.CustomEmergencyCallBinding
 
 @SuppressLint("NotifyDataSetChanged")
@@ -29,11 +28,11 @@ class AdapterEmergencyCall: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as CustomEmergencyCallViewHolder).bindEmergencyCall(dataList[position],position)
+        (holder as CustomEmergencyCallViewHolder).bindEmergencyCall(dataList[position])
     }
 
     inner class CustomEmergencyCallViewHolder(private val binding: CustomEmergencyCallBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bindEmergencyCall(selectEmergency: SelectEmergency,position: Int){
+        fun bindEmergencyCall(selectEmergency: SelectEmergency){
             binding.txtTitle.text = selectEmergency.title
             binding.callPhoneLayout.setOnClickListener{
                 callPhone?.invoke(selectEmergency.phoneNumber)

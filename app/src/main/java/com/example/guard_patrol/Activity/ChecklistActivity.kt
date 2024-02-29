@@ -52,7 +52,7 @@ import com.example.guard_patrol.Class.GetTaskData
 import com.example.guard_patrol.Class.SOP
 import com.example.guard_patrol.Class.Task
 import com.example.guard_patrol.Class.TaskClass
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityChecklistBinding
 import com.google.android.material.internal.ViewUtils.hideKeyboard
@@ -217,7 +217,7 @@ class ChecklistActivity : BasedActivity() {
             cellTypeList[position].remark = remark
 
         }, actionSubmitForm = {
-            showLoadingDialog(this)
+            loadingDialog.showLoadingDialog(this)
             val dataItems = cellTypeList.filter { it.cellType == CellType.TASK }
             var errorDialogShown = false
             val tasksArray = JsonArray()
@@ -232,7 +232,7 @@ class ChecklistActivity : BasedActivity() {
                     val iconResId = R.drawable.ic_error
                     showCustomErrorDialogBox(title, message, iconResId)
                     errorDialogShown = true
-                    dismissLoadingDialog()
+                    loadingDialog.dismissLoadingDialog()
                 } else {
                     if (data.isNormal == false) {
                         if ((data.remark == null || data.remark == "") && !errorDialogShown){
@@ -241,7 +241,7 @@ class ChecklistActivity : BasedActivity() {
                             val iconResId = R.drawable.ic_error
                             showCustomErrorDialogBox(title, message, iconResId)
                             errorDialogShown = true
-                            dismissLoadingDialog()
+                            loadingDialog.dismissLoadingDialog()
                         } else {
                             taskObject.addProperty("remark", data.remark)
                             tasksArray.add(taskObject)
@@ -309,7 +309,7 @@ class ChecklistActivity : BasedActivity() {
             return
         }
         lastClickTime = currentTime
-        showLoadingDialog(this)
+        loadingDialog.showLoadingDialog(this)
         val imageCapture = imageCapture ?: return
         val photoFile = File(
             outputDirectory,
@@ -321,7 +321,7 @@ class ChecklistActivity : BasedActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
-                    dismissLoadingDialog()
+                    loadingDialog.dismissLoadingDialog()
                     Toast.makeText(applicationContext, "Photo capture failed", Toast.LENGTH_SHORT).show()
 //                    Log.e("TestCameraX", "Photo capture failed: ${exc.message}", exc)
                 }
@@ -336,7 +336,7 @@ class ChecklistActivity : BasedActivity() {
                     cropImageOptions.maxCropResultHeight = 2048
                     cropImageOptions.maxCropResultWidth = 2048
                     val cropImageContractOptions  = CropImageContractOptions (imageUri, cropImageOptions)
-                    dismissLoadingDialog()
+                    loadingDialog.dismissLoadingDialog()
                     cropImage.launch(cropImageContractOptions)
                 }
             })
@@ -607,7 +607,7 @@ class ChecklistActivity : BasedActivity() {
                     try {
                         val responseBody = response.body()?.string()
 //                        Log.d("TestSendReport", "Pass Test $responseBody")
-                        dismissLoadingDialog()
+                        loadingDialog.dismissLoadingDialog()
                     } catch (e: Exception) {
                         Log.e("TestSendReport", "Error parsing response body: $e")
                     }
@@ -616,7 +616,7 @@ class ChecklistActivity : BasedActivity() {
                 }
             }
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                dismissLoadingDialog()
+                loadingDialog.dismissLoadingDialog()
                 Log.e("TestSendReport","Error $t")
             }
         })

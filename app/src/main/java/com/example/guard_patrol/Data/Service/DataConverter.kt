@@ -1,4 +1,4 @@
-package com.example.guard_patrol.Data
+package com.example.guard_patrol.Data.Service
 
 import okhttp3.ResponseBody
 import retrofit2.Converter

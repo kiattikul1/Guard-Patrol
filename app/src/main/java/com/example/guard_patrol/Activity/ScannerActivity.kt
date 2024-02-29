@@ -33,7 +33,7 @@ import com.budiyev.android.codescanner.DecodeCallback
 import com.budiyev.android.codescanner.ErrorCallback
 import com.budiyev.android.codescanner.ScanMode
 import com.example.guard_patrol.Class.ScanQrClass
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityScannerBinding
 import com.google.android.gms.location.FusedLocationProviderClient

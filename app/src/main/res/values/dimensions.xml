@@ -7,4 +7,7 @@
     <dimen name="font_title">22dp</dimen>
     <dimen name="font_subtitle">20dp</dimen>
     <dimen name="font_detail">18dp</dimen>
+    <dimen name="shadow_8dp">8dp</dimen>
+    <dimen name="shadow_4dp">4dp</dimen>
+    <dimen name="shadow_custom">4dp</dimen>
 </resources>

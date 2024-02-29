@@ -1,5 +1,6 @@
 package com.example.guard_patrol.Adapter
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.guard_patrol.Class.WorkspaceItem
 import com.example.guard_patrol.databinding.CustomWorkspaceSelectBinding
 
+@SuppressLint("NotifyDataSetChanged")
 class AdapterWorkspaceAll: RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     var dataList = ArrayList<WorkspaceItem>()
         set(value) {

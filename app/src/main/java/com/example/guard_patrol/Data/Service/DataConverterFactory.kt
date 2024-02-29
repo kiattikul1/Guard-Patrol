@@ -1,4 +1,4 @@
-package com.example.guard_patrol.Data
+package com.example.guard_patrol.Data.Service
 
 import com.google.gson.reflect.TypeToken
 import okhttp3.ResponseBody

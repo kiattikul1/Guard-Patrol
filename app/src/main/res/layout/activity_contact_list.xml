@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_bg_app"
-    tools:context=".Activity.EmergencyCallActivity">
+    tools:context=".Activity.ContactListActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLayout"
@@ -31,7 +31,7 @@
             android:id="@+id/txtHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="รายการโทรฉุกเฉิน"
+            android:text="ติดต่อ"
             android:textColor="@color/white"
             android:textSize="@dimen/font_header"
             android:fontFamily="@font/sukhumvitset_bold"
@@ -61,19 +61,56 @@
             android:layout_marginTop="8dp"
             android:paddingVertical="8dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/emergencyCllRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="16dp"
-                app:layout_constraintTop_toTopOf="parent"
+            <android.widget.SearchView
+                android:id="@+id/searchView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:queryHint="ค้นหา รายชื่อ"
+                android:theme="@style/CustomSearchViewStyle"
+                android:iconifiedByDefault="false"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="4dp"
+                app:layout_constraintWidth_percent="0.95"
+                android:background="@drawable/search_bg"
+                android:queryBackground="@android:color/transparent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" >
+
+            </android.widget.SearchView>
+
+            <com.tistory.zladnrms.roundablelayout.RoundableLayout
+                android:id="@+id/listLayout"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:cornerRightTop="50dp"
+                app:cornerLeftTop="50dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/searchView"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/contactListRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:nestedScrollingEnabled="false"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.tistory.zladnrms.roundablelayout.RoundableLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.tistory.zladnrms.roundablelayout.RoundableLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

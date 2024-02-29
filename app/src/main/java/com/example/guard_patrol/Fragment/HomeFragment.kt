@@ -19,15 +19,14 @@ import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.guard_patrol.Activity.ContactListActivity
 import com.example.guard_patrol.Activity.EmergencyCallActivity
 import com.example.guard_patrol.Activity.HistoryActivity
 import com.example.guard_patrol.Activity.ScannerActivity
 import com.example.guard_patrol.Activity.SelectWorkspaceActivity
 import com.example.guard_patrol.Class.HomeClass
 import com.example.guard_patrol.Class.Patrols
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.Data.Preference.TokenPref
 import com.example.guard_patrol.Data.Preference.WorkspacePref
 import com.example.guard_patrol.R
@@ -99,6 +98,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
             val intent = Intent(requireContext(), EmergencyCallActivity::class.java)
             startActivity(intent)
         }
+        binding.buttonContactlist.setOnClickListener {
+            val intent = Intent(requireContext(), ContactListActivity::class.java)
+            startActivity(intent)
+        }
 
         // Get value SharedPreferences
         valuesList = workspacePreference.getPreferences()
@@ -143,6 +146,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback{
             retrofit2.Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
+
                     try {
                         val responseBody = response.body()?.string()
 //                        Log.d("TestHomePatrol", "Pass Test $responseBody")

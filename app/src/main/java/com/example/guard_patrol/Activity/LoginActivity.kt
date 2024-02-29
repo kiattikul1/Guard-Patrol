@@ -13,7 +13,7 @@ import android.view.View
 import android.widget.Toast
 import com.example.guard_patrol.Class.WorkspaceClass
 import com.example.guard_patrol.Class.WorkspaceItem
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.Class.TokenClass
 import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityLoginBinding
@@ -85,7 +85,7 @@ class LoginActivity : BasedActivity() {
         //fun get token
         checkResponse(usernameText.toString(),passwordText.toString()) { token ->
             if (token != null) {
-                showLoadingDialog(this)
+                loadingDialog.showLoadingDialog(this)
 //                showFragmentLoadingDialog()
 
                 tokenPreference.setPreferences(token)
@@ -214,18 +214,18 @@ class LoginActivity : BasedActivity() {
                     }
                 }
 //                dismissFragmentLoadingDialog()
-                dismissLoadingDialog()
+                loadingDialog.dismissLoadingDialog()
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             } else {
 //                dismissFragmentLoadingDialog()
-                dismissLoadingDialog()
+                loadingDialog.dismissLoadingDialog()
                 val intent = Intent(this, SelectWorkspaceActivity::class.java)
                 startActivity(intent)
             }
         } else {
 //            dismissFragmentLoadingDialog()
-            dismissLoadingDialog()
+            loadingDialog.dismissLoadingDialog()
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }

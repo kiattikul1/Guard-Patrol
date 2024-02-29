@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.guard_patrol.Adapter.AdapterEmergencyCall
 import com.example.guard_patrol.Class.EmergencyCallClass
 import com.example.guard_patrol.Class.SelectEmergency
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.databinding.ActivityEmergencyCallBinding
 import com.google.gson.Gson
 import com.google.gson.JsonObject

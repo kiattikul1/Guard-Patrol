@@ -16,7 +16,7 @@
         app:strokeLineWidth="3dp"
         android:foreground="?android:attr/selectableItemBackground"
         android:clickable="true"
-        app:backgroundColor="#f0f0f0"
+        app:backgroundColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">

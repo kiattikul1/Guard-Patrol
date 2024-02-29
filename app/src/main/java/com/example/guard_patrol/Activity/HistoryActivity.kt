@@ -9,7 +9,7 @@ import com.example.guard_patrol.Adapter.AdapterDateSelectHistory
 import com.example.guard_patrol.Adapter.AdapterHistoryTask
 import com.example.guard_patrol.Class.HistoryClass
 import com.example.guard_patrol.Class.Patrol
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.databinding.ActivityHistoryBinding
 import com.google.gson.Gson
 import com.google.gson.JsonObject

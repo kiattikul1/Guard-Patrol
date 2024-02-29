@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.guard_patrol.Adapter.AdapterWorkspaceAll
@@ -13,7 +12,7 @@ import com.example.guard_patrol.Adapter.AdapterWorkspaceFilter
 import com.example.guard_patrol.Adapter.AdapterWorkspaceToday
 import com.example.guard_patrol.Class.WorkspaceClass
 import com.example.guard_patrol.Class.WorkspaceItem
-import com.example.guard_patrol.Data.AllService
+import com.example.guard_patrol.Data.Service.AllService
 import com.example.guard_patrol.databinding.ActivitySelectworkspaceBinding
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -113,7 +112,7 @@ class SelectWorkspaceActivity : BasedActivity() {
         val reqObject = JsonObject()
         reqObject.addProperty("query",query)
 
-        showLoadingDialog(this)
+        loadingDialog.showLoadingDialog(this)
 
         AllService.initialize(applicationContext)
         val retrofitService = AllService.getInstance()
@@ -162,7 +161,7 @@ class SelectWorkspaceActivity : BasedActivity() {
 //                                Log.d("Test WorkspaceList", "check $workspaceAllList")
                             }
                         }
-                        dismissLoadingDialog()
+                        loadingDialog.dismissLoadingDialog()
                     } catch (e: Exception) {
                         Log.e("TestGetWorkspace", "Error parsing response body: $e")
                     }
@@ -170,11 +169,9 @@ class SelectWorkspaceActivity : BasedActivity() {
                     Log.e("TestGetWorkspace", "Fail Test ${response.code()}")
                 }
             }
-
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("TestGetWorkspace","Error $t")
             }
-
         })
 
         //Filter

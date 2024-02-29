@@ -1,15 +1,15 @@
 package com.example.guard_patrol.Adapter
 
+import android.annotation.SuppressLint
 import android.graphics.Color
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.guard_patrol.Class.WorkspaceClass
 import com.example.guard_patrol.Class.WorkspaceItem
 import com.example.guard_patrol.databinding.CustomWorkspaceSelectBinding
 
+@SuppressLint("NotifyDataSetChanged")
 class AdapterWorkspaceFilter: RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     var dataList = ArrayList<WorkspaceItem>()
         set(value) {
