@@ -71,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:text="ตกลง"
                     android:fontFamily="@font/sukhumvitset_bold"
-                    android:textSize="26dp"
+                    android:textSize="26sp"
                     android:textColor="@color/white"
                     android:padding="12dp"
                     android:layout_gravity="center"

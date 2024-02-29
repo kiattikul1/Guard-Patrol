@@ -11,12 +11,12 @@
 
     <style name="BottomNavigationViewTextStyleActive">
         <item name="android:fontFamily">@font/sukhumvitset_medium</item>
-        <item name="android:textSize">18dp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="BottomNavigationViewTextStyleInactive">
         <item name="android:fontFamily">@font/sukhumvitset_bold</item>
-        <item name="android:textSize">18dp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="CustomSearchViewStyle" parent="Widget.AppCompat.SearchView" >

@@ -13,8 +13,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:cornerAll="16dp"
-        app:backgroundColor="#EAF1FB"
-        android:elevation="@dimen/shadow_custom"
+        android:elevation="4dp"
+        app:backgroundColor="@color/color_bg_app"
         android:layout_marginVertical="16dp"
         app:layout_constraintWidth_percent="0.90"
         app:layout_constraintTop_toTopOf="parent"
@@ -24,55 +24,61 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp">
+            android:padding="8dp"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp">
 
             <ImageView
                 android:id="@+id/imageProfile"
-                android:layout_width="136dp"
-                android:layout_height="136dp"
+                android:layout_width="144dp"
+                android:layout_height="144dp"
                 android:layout_margin="16dp"
-                android:src="@drawable/baseline_account_circle_24"
-                app:layout_constraintTop_toTopOf="parent"
+                android:src="@drawable/baseline_account_circle"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/imageProfile"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/imageProfile">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layoutFullname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
                         android:id="@+id/fullName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ชื่อ"
-                        android:fontFamily="@font/sukhumvitset_bold"
-                        android:textSize="@dimen/font_title"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_bold"
+                        android:text="ชื่อ"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_subtitle"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
                         android:id="@+id/fullNameTxt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:fontFamily="@font/sukhumvitset_light"
-                        android:textSize="@dimen/font_title"
-                        android:layout_marginTop="8dp"
                         android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_light"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_detail"
+                        app:layout_constraintStart_toEndOf="@+id/fullName"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/fullName" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -80,31 +86,35 @@
                     android:id="@+id/layoutRole"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/layoutFullname"
-                    app:layout_constraintStart_toStartOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutFullname">
 
                     <TextView
                         android:id="@+id/role"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="หน้าที่"
-                        android:fontFamily="@font/sukhumvitset_bold"
-                        android:textSize="@dimen/font_title"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_bold"
+                        android:text="หน้าที่"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_subtitle"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
                         android:id="@+id/roleTxt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:fontFamily="@font/sukhumvitset_light"
-                        android:textSize="@dimen/font_title"
-                        android:layout_marginTop="8dp"
                         android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_light"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_detail"
+                        app:layout_constraintStart_toEndOf="@+id/role"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/role" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -112,31 +122,35 @@
                     android:id="@+id/layoutBirthday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/layoutRole"
-                    app:layout_constraintStart_toStartOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutRole">
 
                     <TextView
                         android:id="@+id/birthday"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="วันเกิด"
-                        android:fontFamily="@font/sukhumvitset_bold"
-                        android:textSize="@dimen/font_title"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_bold"
+                        android:text="วันเกิด"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_subtitle"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
                         android:id="@+id/birthdayTxt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:fontFamily="@font/sukhumvitset_light"
-                        android:textSize="@dimen/font_title"
-                        android:layout_marginTop="8dp"
                         android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_light"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_detail"
+                        app:layout_constraintStart_toEndOf="@+id/birthday"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/birthday" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -144,31 +158,35 @@
                     android:id="@+id/layoutPhoneNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/layoutBirthday"
-                    app:layout_constraintStart_toStartOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutBirthday">
 
                     <TextView
                         android:id="@+id/phoneNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="เบอร์โทร"
-                        android:fontFamily="@font/sukhumvitset_bold"
-                        android:textSize="@dimen/font_title"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_bold"
+                        android:text="เบอร์โทร"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_subtitle"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
                         android:id="@+id/phoneNumberTxt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:fontFamily="@font/sukhumvitset_light"
-                        android:textSize="@dimen/font_title"
-                        android:layout_marginTop="8dp"
                         android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_light"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_detail"
+                        app:layout_constraintStart_toEndOf="@+id/phoneNumber"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/phoneNumber" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -176,31 +194,35 @@
                     android:id="@+id/layoutEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@+id/layoutPhoneNumber"
-                    app:layout_constraintStart_toStartOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/layoutPhoneNumber">
 
                     <TextView
                         android:id="@+id/email"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="อีเมล"
-                        android:fontFamily="@font/sukhumvitset_bold"
-                        android:textSize="@dimen/font_title"
                         android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_bold"
+                        android:text="อีเมล"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_subtitle"
+                        app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                     <TextView
                         android:id="@+id/emailTxt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=""
-                        android:fontFamily="@font/sukhumvitset_light"
-                        android:textSize="@dimen/font_title"
-                        android:layout_marginTop="8dp"
                         android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/sukhumvitset_light"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_detail"
+                        app:layout_constraintStart_toEndOf="@+id/email"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/email" />
+                        app:layout_constraintBottom_toBottomOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -219,7 +241,7 @@
         android:clickable="true"
         android:elevation="@dimen/shadow_custom"
         android:foreground="?android:attr/selectableItemBackground"
-        app:backgroundColor="#EAF1FB"
+        app:backgroundColor="@color/white"
         android:layout_marginVertical="16dp"
         app:layout_constraintWidth_percent="0.90"
         app:layout_constraintTop_toBottomOf="@+id/layoutUserDetail"
@@ -233,8 +255,8 @@
 
             <ImageView
                 android:id="@+id/iconChangePass"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:src="@drawable/ic_change_password"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -247,7 +269,7 @@
                 android:text="เปลี่ยนรหัสผ่าน"
                 android:layout_marginStart="8dp"
                 android:fontFamily="@font/sukhumvitset_bold"
-                android:textSize="@dimen/font_title"
+                android:textSize="@dimen/font_subtitle"
                 app:layout_constraintStart_toEndOf="@+id/iconChangePass"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
@@ -265,7 +287,7 @@
         android:clickable="true"
         android:elevation="@dimen/shadow_custom"
         android:foreground="?android:attr/selectableItemBackground"
-        app:backgroundColor="#EAF1FB"
+        app:backgroundColor="@color/white"
         android:layout_marginVertical="16dp"
         app:layout_constraintWidth_percent="0.90"
         app:layout_constraintTop_toBottomOf="@+id/btnChangePass"
@@ -279,8 +301,8 @@
 
             <ImageView
                 android:id="@+id/iconLogOut"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:src="@drawable/baseline_logout_24"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -294,7 +316,7 @@
                 android:textColor="@color/red"
                 android:layout_marginStart="8dp"
                 android:fontFamily="@font/sukhumvitset_bold"
-                android:textSize="@dimen/font_title"
+                android:textSize="@dimen/font_subtitle"
                 app:layout_constraintStart_toEndOf="@+id/iconLogOut"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>

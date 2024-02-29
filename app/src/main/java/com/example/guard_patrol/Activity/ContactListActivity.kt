@@ -61,15 +61,16 @@ class ContactListActivity : BasedActivity() {
             val sumContact = ArrayList<AuthenticationPhone>()
             sumContact.addAll(contact)
             for (i in sumContact) {
-//                 Log.d("TestFilter", "Check firstname ${i.firstname}")
-                if (query.let { i.firstname?.toLowerCase(Locale.ROOT)?.contains(it.toString()) } == true
-                    || query.let { i.lastname?.toLowerCase(Locale.ROOT)?.contains(it.toString()) } == true
-                    || query.let { i.phoneNumber?.toLowerCase(Locale.ROOT)?.contains(it.toString()) } == true) {
+                if (query.let { i.firstname?.toLowerCase(Locale.ROOT)?.contains(it) } == true
+                    || query.let { i.lastname?.toLowerCase(Locale.ROOT)?.contains(it) } == true
+                    || query.let { i.phoneNumber?.toLowerCase(Locale.ROOT)?.contains(it) } == true) {
                     filteredList.add(i)
                 }
             }
 //            Log.d("TestFilter", "Check filteredList $filteredList")
             contactListAdapter.setFilteredList(filteredList)
+        }else{
+            contactListAdapter.setFilteredList(contact)
         }
     }
 

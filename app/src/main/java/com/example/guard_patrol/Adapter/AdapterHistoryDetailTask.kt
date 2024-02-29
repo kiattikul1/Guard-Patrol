@@ -7,10 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.guard_patrol.Class.Tasks
+import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.CustomHistoryDetailTaskBinding
+import com.squareup.picasso.Picasso
 
 @SuppressLint("NotifyDataSetChanged")
 class AdapterHistoryDetailTask(private var showImage: ((imageUrl: String)-> Unit)? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -60,9 +60,9 @@ class AdapterHistoryDetailTask(private var showImage: ((imageUrl: String)-> Unit
                 if (!task.evidenceImages.isNullOrEmpty()) {
                     val eImage1 = task.evidenceImages.getOrNull(0)
                     if (eImage1 != null) {
-                        Glide.with(binding.root.context)
+                        Picasso.get()
                             .load(eImage1)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .error(R.mipmap.ic_launcher)
                             .into(binding.imageFirst)
                         binding.imagePicker1.setOnClickListener {
                             showImage?.invoke(eImage1)
@@ -71,9 +71,9 @@ class AdapterHistoryDetailTask(private var showImage: ((imageUrl: String)-> Unit
 
                     val eImage2 = task.evidenceImages.getOrNull(1)
                     if (eImage2 != null) {
-                        Glide.with(binding.root.context)
+                        Picasso.get()
                             .load(eImage2)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .error(R.mipmap.ic_launcher)
                             .into(binding.imageSecond)
                         binding.imagePicker2.setOnClickListener {
                             showImage?.invoke(eImage2)
@@ -84,9 +84,9 @@ class AdapterHistoryDetailTask(private var showImage: ((imageUrl: String)-> Unit
 
                     val eImage3 = task.evidenceImages.getOrNull(2)
                     if (eImage3 != null) {
-                        Glide.with(binding.root.context)
+                        Picasso.get()
                             .load(eImage3)
-                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .error(R.mipmap.ic_launcher)
                             .into(binding.imageThird)
                         binding.imagePicker3.setOnClickListener {
                             showImage?.invoke(eImage3)

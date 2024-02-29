@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:text="สถานที่ปฏิบัติงาน"
             android:textColor="@color/white"
-            android:textSize="28dp"
+            android:textSize="@dimen/font_header"
             android:fontFamily="@font/sukhumvitset_bold"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btnBack"

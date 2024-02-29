@@ -12,16 +12,16 @@ import android.view.Window
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.guard_patrol.Adapter.AdapterHistoryDetailTask
 import com.example.guard_patrol.Class.HistoryDetailClass
 import com.example.guard_patrol.Class.SOPS
 import com.example.guard_patrol.Class.Tasks
 import com.example.guard_patrol.Data.Service.AllService
+import com.example.guard_patrol.R
 import com.example.guard_patrol.databinding.ActivityHistoryDetailBinding
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.squareup.picasso.Picasso
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -168,9 +168,9 @@ class HistoryDetailActivity : BasedActivity() {
             //nothing;
         }
         val imageView = ImageView(this)
-        Glide.with(imageView.context)
+        Picasso.get()
             .load(imageUrl)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .error(R.mipmap.ic_launcher)
             .into(imageView)
         builder.addContentView(
             imageView, RelativeLayout.LayoutParams(

@@ -1,5 +1,6 @@
 package com.example.guard_patrol.Activity
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.WindowManager
@@ -7,6 +8,7 @@ import android.content.Intent
 import android.os.Handler
 import com.example.guard_patrol.R
 
+@SuppressLint("CustomSplashScreen")
 @Suppress("DEPRECATION")
 class SplashScreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
